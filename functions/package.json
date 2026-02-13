@@ -1,0 +1,13 @@
+{
+  "name": "cse-connect-functions",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "18"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^4.5.0",
+    "twilio": "^4.21.0"
+  }
+}

@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function emailKey(email) {
+      return replace(lowercase(email), '\\.', ',');
+    }
+
+    function isAllowedEmail() {
+      return exists(/databases/$(database)/documents/allowlist/$(request.auth.token.email)) ||
+        exists(/databases/$(database)/documents/allowlist/$(emailKey(request.auth.token.email)));
+    }
+
+    match /allowlist/{docId} {
+      allow read: if isSignedIn() && (
+        docId == request.auth.token.email ||
+        docId == emailKey(request.auth.token.email) ||
+        isAllowedEmail()
+      );
+      allow write: if isSignedIn() && isAllowedEmail();
+    }
+
+    match /{document=**} {
+      allow read, write: if isSignedIn() && isAllowedEmail();
+    }
+  }
+}
