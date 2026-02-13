@@ -76,7 +76,7 @@ const SignInPage = () => {
           width: '100%',
           position: 'relative',
           overflow: 'hidden',
-          borderRadius: 28,
+          borderRadius: 2,
           boxShadow: '0 26px 60px rgba(255, 125, 110, 0.18)'
         }}
       >

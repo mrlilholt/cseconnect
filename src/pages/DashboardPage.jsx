@@ -127,11 +127,12 @@ const DashboardPage = () => {
   const [isIosInstallHint, setIsIosInstallHint] = useState(false);
 
   useEffect(() => {
-    const handler = (event) => {
-      event.preventDefault();
-      setInstallPrompt(event);
+    const syncInstallPrompt = () => {
+      setInstallPrompt(window.__pwaInstallPrompt || null);
     };
-    window.addEventListener('beforeinstallprompt', handler);
+
+    syncInstallPrompt();
+    window.addEventListener('pwa-install-available', syncInstallPrompt);
 
     const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
     const isStandalone =
@@ -139,7 +140,7 @@ const DashboardPage = () => {
     setIsIosInstallHint(isIos && !isStandalone);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('pwa-install-available', syncInstallPrompt);
     };
   }, []);
 
@@ -278,11 +279,13 @@ const DashboardPage = () => {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    const result = await installPrompt.userChoice;
+    const promptEvent = installPrompt || window.__pwaInstallPrompt;
+    if (!promptEvent) return;
+    promptEvent.prompt();
+    const result = await promptEvent.userChoice;
     if (result?.outcome === 'accepted') {
       setInstallPrompt(null);
+      window.__pwaInstallPrompt = null;
     }
   };
 
