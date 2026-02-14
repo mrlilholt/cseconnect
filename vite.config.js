@@ -25,27 +25,27 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: '/icon.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
             src: '/pwa-192x192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
             src: '/apple-touch-icon.png',
             sizes: '180x180',
             type: 'image/png'
+          },
+          {
+            src: '/icon.png',
+            sizes: '2000x2000',
+            type: 'image/png',
+            purpose: 'any'
           }
         ]
       },

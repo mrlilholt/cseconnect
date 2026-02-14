@@ -61,8 +61,12 @@ const SignInPage = () => {
           </div>
           <div className="relative">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="CS&E Connect logo" className="h-10 w-10 rounded-[2px]" />
-              <h1 className="text-2xl font-semibold text-gradient font-display">CS&E Connect</h1>
+              <img
+                src="/logo.png"
+                alt="CS&E Connect"
+                className="h-10 w-auto rounded-[2px] object-contain"
+              />
+              <span className="sr-only">CS&E Connect</span>
             </div>
             <p className="mt-2 text-sm text-holographic">
               Sign in with your department account to join the conversation.
