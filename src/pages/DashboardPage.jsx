@@ -17,6 +17,7 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Skeleton from '../components/ui/Skeleton';
 import OnlineUsersPanel from '../components/OnlineUsersPanel';
+import { useAuth } from '../lib/auth';
 
 const RecentCard = ({ title, items, loading, emptyLabel }) => (
   <Card className="rounded-[2px]">
@@ -88,7 +89,71 @@ const NavCard = ({ title, subtitle, icon: Icon, to }) => (
   </Link>
 );
 
+const getHeroCopy = (date = new Date(), user) => {
+  const hour = date.getHours();
+  const day = date.getDay();
+  const isWeekend = day === 0 || day === 6;
+  const isLateNight = hour >= 22 || hour < 5;
+  const isMorning = hour >= 5 && hour < 12;
+  const isAfternoon = hour >= 12 && hour < 17;
+  const isEvening = hour >= 17 && hour < 22;
+  const firstName =
+    user?.displayName?.split(' ')?.[0] ||
+    user?.email?.split('@')?.[0]?.split('.')?.[0] ||
+    '';
+  const greetingPrefix = firstName ? `Hey ${firstName}!` : 'Hey there!';
+
+  if (isWeekend) {
+    let subtitle = 'What are you doing working on a weekend? We still have your back.';
+    if (isLateNight) {
+      subtitle += ' At least it is cozy here :).';
+    } else if (isMorning) {
+      subtitle += ' Grab a coffee and make it quick.';
+    } else if (isEvening) {
+      subtitle += ' Wrap it up soon and recharge.';
+    }
+    return {
+      title: greetingPrefix,
+      subtitle
+    };
+  }
+
+  if (isLateNight) {
+    return {
+      title: greetingPrefix,
+      subtitle: 'At least it is cozy here :).'
+    };
+  }
+
+  if (isMorning) {
+    return {
+      title: greetingPrefix,
+      subtitle: 'Fresh starts and fresh ideas. Let’s keep the momentum.'
+    };
+  }
+
+  if (isAfternoon) {
+    return {
+      title: greetingPrefix,
+      subtitle: 'Midday momentum looks good. Keep the thread moving.'
+    };
+  }
+
+  if (isEvening) {
+    return {
+      title: greetingPrefix,
+      subtitle: 'Wrap up the day with a few wins and a clear head.'
+    };
+  }
+
+  return {
+    title: greetingPrefix,
+    subtitle: 'A quick pulse on the CS&E department.'
+  };
+};
+
 const DashboardPage = () => {
+  const { user } = useAuth();
   const [counts, setCounts] = useState({
     feed: 0,
     projects: 0,
@@ -257,6 +322,8 @@ const DashboardPage = () => {
     }
   };
 
+  const heroCopy = getHeroCopy(new Date(), user);
+
   return (
     <div className="space-y-6">
       {!isInstalled && (
@@ -286,10 +353,9 @@ const DashboardPage = () => {
           </div>
           <div className="relative max-w-xl">
             <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">Department pulse</span>
-            <h2 className="mt-3 text-3xl font-semibold text-gradient">Welcome back</h2>
+            <h2 className="mt-3 text-3xl font-semibold text-gradient">{heroCopy.title}</h2>
             <p className="mt-2 text-sm text-white/60">
-              A quick pulse on the CS&E department. Jump into the latest updates or start a new
-              thread.
+              {heroCopy.subtitle} Jump into the latest updates or start a new thread.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <Button as="a" href="/feed">
