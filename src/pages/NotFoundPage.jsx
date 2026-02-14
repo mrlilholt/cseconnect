@@ -1,22 +1,16 @@
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import Button from '../components/ui/Button';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
   return (
-    <Box sx={{ py: 8, textAlign: 'center' }}>
-      <Typography variant="h4" sx={{ fontWeight: 700 }} gutterBottom>
-        Page not found
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
-        This page does not exist. Head back to the dashboard.
-      </Typography>
-      <Button variant="contained" onClick={() => navigate('/')}
-      >
-        Go to dashboard
-      </Button>
-    </Box>
+    <div className="py-16 text-center">
+      <img src="/logo.png" alt="CS&E Connect logo" className="mx-auto h-12 w-12 rounded-[2px]" />
+      <h1 className="mt-4 text-3xl font-semibold text-gradient font-display">Page not found</h1>
+      <p className="mt-3 text-sm text-white/50">This page does not exist. Head back to the dashboard.</p>
+      <Button className="mt-6" onClick={() => navigate('/')}>Go to dashboard</Button>
+    </div>
   );
 };
 

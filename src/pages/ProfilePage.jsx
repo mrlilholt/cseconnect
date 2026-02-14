@@ -1,23 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  TextField,
-  Typography,
-  Alert,
-  Avatar,
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup
-} from '@mui/material';
 import { collection, onSnapshot, query, where, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { useAuth } from '../lib/auth';
 import { isValidE164 } from '../lib/validators';
 import LoadingScreen from '../components/LoadingScreen';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import Alert from '../components/ui/Alert';
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -99,137 +90,74 @@ const ProfilePage = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 980 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 2 }}>
-        Profile
-      </Typography>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-semibold text-gradient">Profile</h2>
 
-      <Card sx={{ mb: 3, borderRadius: 2, overflow: 'hidden' }}>
-        <CardContent sx={{ p: 0 }}>
-          <Box
-            sx={{
-              p: { xs: 3, md: 4 },
-              background: 'linear-gradient(135deg, #FFB3A7 0%, #FF7D6E 60%, #FF9A84 100%)',
-              color: '#fff',
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr', md: 'auto 1fr auto' },
-              alignItems: 'center',
-              gap: 3
-            }}
-          >
-            <Avatar
-              src={user?.photoURL || ''}
-              sx={{
-                width: 96,
-                height: 96,
-                border: '4px solid rgba(255, 255, 255, 0.85)'
-              }}
+      <Card className="rounded-[2px] p-0">
+        <div className="grid gap-6 border-b border-white/10 bg-gradient-to-br from-coral/30 to-neonpink/30 p-6 md:grid-cols-[auto_1fr_auto]">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/30 bg-black/40 text-xl font-semibold text-white">
+            {user?.displayName?.[0] || user?.email?.[0] || 'U'}
+          </div>
+          <div>
+            <p className="text-lg font-semibold text-white">{user?.displayName || profile?.displayName}</p>
+            <p className="text-xs text-white/60">{user?.email}</p>
+          </div>
+          <div className="flex flex-wrap gap-6 text-sm text-white/70">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-white/40">Posts</p>
+              <p className="text-lg font-semibold text-white">{postsCount}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-widest text-white/40">Teammates</p>
+              <p className="text-lg font-semibold text-white">{teammatesCount}</p>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 p-4">
+          {['feeds', 'projects', 'links'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setSegment(tab)}
+              className={`rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-widest ${
+                segment === tab ? 'bg-gradient-to-r from-coral to-neonpink text-white shadow-glow' : 'border border-white/10 text-white/50'
+              }`}
             >
-              {user?.displayName?.[0] || user?.email?.[0] || 'U'}
-            </Avatar>
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                {user?.displayName || profile?.displayName || 'Department Member'}
-              </Typography>
-              <Typography sx={{ opacity: 0.9 }}>{user?.email}</Typography>
-            </Box>
-            <Stack direction={{ xs: 'row', md: 'column' }} spacing={2} sx={{ minWidth: 180 }}>
-              <Box>
-                <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>
-                  Posts
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  {postsCount}
-                </Typography>
-              </Box>
-              <Box>
-                <Typography variant="subtitle2" sx={{ opacity: 0.9 }}>
-                  Teammates
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                  {teammatesCount}
-                </Typography>
-              </Box>
-            </Stack>
-          </Box>
-
-          <Box sx={{ p: { xs: 3, md: 4 }, backgroundColor: '#fff' }}>
-            <ToggleButtonGroup
-              value={segment}
-              exclusive
-              onChange={(_, value) => value && setSegment(value)}
-              sx={{
-                backgroundColor: 'rgba(255, 173, 153, 0.2)',
-                p: 0.6,
-                borderRadius: 999,
-                '& .MuiToggleButton-root': {
-                  border: 'none',
-                  borderRadius: 999,
-                  px: 3,
-                  color: 'text.secondary'
-                },
-                '& .MuiToggleButton-root.Mui-selected': {
-                  backgroundColor: '#FF7D6E',
-                  color: '#fff'
-                }
-              }}
-            >
-              <ToggleButton value="feeds">Feeds</ToggleButton>
-              <ToggleButton value="projects">Projects</ToggleButton>
-              <ToggleButton value="links">Links</ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-        </CardContent>
+              {tab}
+            </button>
+          ))}
+        </div>
       </Card>
 
-      <Card sx={{ borderRadius: 2 }}>
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-            Contact settings
-          </Typography>
-          <TextField
-            label="Display name"
-            value={displayName}
-            onChange={(event) => setDisplayName(event.target.value)}
-            placeholder="e.g., Ada Lovelace"
-            fullWidth
-            sx={{
-              mb: 2,
-              '& .MuiOutlinedInput-root': { borderRadius: 2 }
-            }}
-          />
-          <TextField
-            label="Phone number (for alerts)"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
-            placeholder="+15551234567"
-            fullWidth
-            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-          />
-          <Typography color="text.secondary" sx={{ mt: 1 }}>
-            Use E.164 format. This is required to receive SMS alerts.
-          </Typography>
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              {success}
-            </Alert>
-          )}
-          <Button
-            variant="contained"
-            sx={{ mt: 3 }}
-            onClick={handleSave}
-            disabled={saving}
-          >
+      <Card className="rounded-[2px]">
+        <h3 className="text-sm font-semibold text-gradient">Contact settings</h3>
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-white/40">Display name</label>
+            <Input
+              className="mt-2 rounded-[2px]"
+              value={displayName}
+              onChange={(event) => setDisplayName(event.target.value)}
+              placeholder="e.g., Ada Lovelace"
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-[0.2em] text-white/40">Phone number (for alerts)</label>
+            <Input
+              className="mt-2 rounded-[2px]"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+15551234567"
+            />
+            <p className="mt-1 text-xs text-white/40">Use E.164 format. This is required to receive SMS alerts.</p>
+          </div>
+          {error && <Alert variant="error">{error}</Alert>}
+          {success && <Alert variant="success">{success}</Alert>}
+          <Button className="w-fit" onClick={handleSave} disabled={saving}>
             Save changes
           </Button>
-        </CardContent>
+        </div>
       </Card>
-    </Box>
+    </div>
   );
 };
 

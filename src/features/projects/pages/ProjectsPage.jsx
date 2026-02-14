@@ -1,22 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Box,
-  Button,
-  Grid,
-  MenuItem,
-  Select,
-  Stack,
-  Typography,
-  Skeleton,
-  Snackbar,
-  Alert
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../../lib/auth';
 import { createProject, deleteProject, subscribeToProjects, updateProject } from '../api';
 import ProjectCard from '../components/ProjectCard';
 import ProjectDialog from '../components/ProjectDialog';
 import EmptyState from '../../../components/EmptyState';
+import Button from '../../../components/ui/Button';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const ProjectsPage = () => {
   const { user } = useAuth();
@@ -25,7 +15,7 @@ const ProjectsPage = () => {
   const [filter, setFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToProjects((items) => {
@@ -40,8 +30,9 @@ const ProjectsPage = () => {
     return projects.filter((project) => project.status === filter);
   }, [projects, filter]);
 
-  const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+  const showMessage = (message) => {
+    setSnackbar({ message });
+    setTimeout(() => setSnackbar(null), 3000);
   };
 
   const handleCreate = async (payload) => {
@@ -50,7 +41,7 @@ const ProjectsPage = () => {
       setDialogOpen(false);
       showMessage('Project created.');
     } catch (error) {
-      showMessage(error.message || 'Unable to create project.', 'error');
+      showMessage(error.message || 'Unable to create project.');
     }
   };
 
@@ -61,7 +52,7 @@ const ProjectsPage = () => {
       setEditingProject(null);
       showMessage('Project updated.');
     } catch (error) {
-      showMessage(error.message || 'Unable to update project.', 'error');
+      showMessage(error.message || 'Unable to update project.');
     }
   };
 
@@ -70,7 +61,7 @@ const ProjectsPage = () => {
       await deleteProject(projectId);
       showMessage('Project deleted.');
     } catch (error) {
-      showMessage(error.message || 'Unable to delete project.', 'error');
+      showMessage(error.message || 'Unable to delete project.');
     }
   };
 
@@ -85,62 +76,51 @@ const ProjectsPage = () => {
   };
 
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={2} sx={{ mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Side Projects
-          </Typography>
-          <Typography color="text.secondary">Track ideas, active experiments, and launches.</Typography>
-        </Box>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Select
-            size="small"
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-gradient">Side Projects</h2>
+          <p className="text-sm text-white/50">Track ideas, active experiments, and launches.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            className="rounded-[2px] border border-white/10 bg-black/40 px-3 py-2 text-xs text-white/70"
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
-            sx={{
-              borderRadius: 999,
-              backgroundColor: '#fff',
-              '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'rgba(255, 173, 153, 0.5)'
-              }
-            }}
           >
-            <MenuItem value="all">All statuses</MenuItem>
-            <MenuItem value="idea">Idea</MenuItem>
-            <MenuItem value="in_progress">In progress</MenuItem>
-            <MenuItem value="shipping">Shipping</MenuItem>
-            <MenuItem value="done">Done</MenuItem>
-          </Select>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
+            <option value="all">All statuses</option>
+            <option value="idea">Idea</option>
+            <option value="in_progress">In progress</option>
+            <option value="shipping">Shipping</option>
+            <option value="done">Done</option>
+          </select>
+          <Button onClick={openCreate}>
+            <Plus size={14} />
             New project
           </Button>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
 
       {loading ? (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 md:grid-cols-2">
           {[0, 1, 2].map((item) => (
-            <Grid item xs={12} md={6} key={item}>
-              <Skeleton height={220} />
-            </Grid>
+            <Skeleton key={item} className="h-40 w-full" />
           ))}
-        </Grid>
+        </div>
       ) : filtered.length === 0 ? (
         <EmptyState title="No projects yet" subtitle="Start tracking a side project." />
       ) : (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 md:grid-cols-2">
           {filtered.map((project) => (
-            <Grid item xs={12} md={6} key={project.id}>
-              <ProjectCard
-                project={project}
-                canEdit={project.ownerUid === user.uid}
-                onEdit={openEdit}
-                onDelete={handleDelete}
-              />
-            </Grid>
+            <ProjectCard
+              key={project.id}
+              project={project}
+              canEdit={project.ownerUid === user.uid}
+              onEdit={openEdit}
+              onDelete={handleDelete}
+            />
           ))}
-        </Grid>
+        </div>
       )}
 
       <ProjectDialog
@@ -150,16 +130,12 @@ const ProjectsPage = () => {
         initialProject={editingProject}
       />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6 rounded-[2px] border border-white/10 bg-black/70 px-4 py-2 text-xs text-white/80">
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

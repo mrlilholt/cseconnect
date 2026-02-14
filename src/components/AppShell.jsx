@@ -1,28 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  AppBar,
-  Avatar,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Typography,
-  useMediaQuery
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import React, { useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import NavDrawer, { drawerWidth } from './NavDrawer';
+import { Menu } from 'lucide-react';
+import NavDrawer from './NavDrawer';
 import { auth } from '../lib/firebase';
 import { useAuth } from '../lib/auth';
+import Avatar from './ui/Avatar';
+import IconButton from './ui/IconButton';
 
 const AppShell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
-  const [drawerOpen, setDrawerOpen] = useState(!isMobile);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const initials = useMemo(() => {
     if (!user) return 'CS';
@@ -37,99 +27,65 @@ const AppShell = () => {
     return user.email ? user.email[0].toUpperCase() : 'CS';
   }, [user]);
 
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
-
   const handleSignOut = async () => {
     await signOut(auth);
   };
 
-  const drawerVariant = isMobile ? 'temporary' : 'permanent';
-
-  useEffect(() => {
-    setDrawerOpen(!isMobile);
-  }, [isMobile]);
-
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        sx={{
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          color: 'text.primary',
-          borderBottom: '1px solid rgba(255, 173, 153, 0.35)',
-          backdropFilter: 'blur(8px)',
-          zIndex: (theme) => theme.zIndex.drawer + 1
-        }}
-      >
-        <Toolbar sx={{ gap: 2 }}>
-          {isMobile && (
-            <IconButton onClick={() => setDrawerOpen(true)}>
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            CS&E Connect
-          </Typography>
-          <Box sx={{ flex: 1 }} />
-          <IconButton onClick={handleMenuOpen}>
-            <Avatar
-              src={user?.photoURL || ''}
-              alt={user?.displayName || 'User'}
-              sx={{
-                width: 42,
-                height: 42,
-                border: '2px solid rgba(255, 173, 153, 0.6)'
-              }}
-            >
-              {initials}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          >
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                navigate('/profile');
-              }}
-            >
-              Profile & Settings
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                handleMenuClose();
-                handleSignOut();
-              }}
-            >
-              Sign out
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-      <NavDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        variant={drawerVariant}
-      />
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: { xs: 2, md: 3 },
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-          mt: 10
-        }}
-      >
-        <Outlet />
-      </Box>
-    </Box>
+    <div className="min-h-screen cyber-bg text-holographic">
+      <NavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <div className="md:ml-64">
+        <header className="sticky top-0 z-30 border-b border-white/10 bg-black/70 backdrop-blur-2xl">
+          <div className="flex items-center justify-between px-4 py-3 md:px-6">
+            <div className="flex items-center gap-3">
+              <IconButton className="md:hidden" onClick={() => setDrawerOpen(true)}>
+                <Menu size={18} />
+              </IconButton>
+              <img
+                src="/logo.png"
+                alt="CS&E Connect"
+                className="h-8 w-auto rounded-[2px] object-contain"
+              />
+              <span className="sr-only">CS&E Connect</span>
+            </div>
+            <div className="relative">
+              <button
+                className="flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-2 py-1"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
+                <Avatar src={user?.photoURL || ''} fallback={initials} />
+                <span className="hidden text-sm text-white/70 sm:block">{user?.displayName || 'Member'}</span>
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-40 rounded-[2px] border border-white/10 bg-black/80 p-2 shadow-glow">
+                  <button
+                    className="w-full rounded-[2px] px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate('/profile');
+                    }}
+                  >
+                    Profile & Settings
+                  </button>
+                  <button
+                    className="mt-1 w-full rounded-[2px] px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      handleSignOut();
+                    }}
+                  >
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+        <main className="px-4 py-6 md:px-6">
+          <Outlet />
+        </main>
+      </div>
+    </div>
   );
 };
 

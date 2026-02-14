@@ -1,17 +1,10 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
 
 const EmptyState = ({ title, subtitle }) => (
-  <Box sx={{ textAlign: 'center', py: 6 }}>
-    <Typography variant="h6" sx={{ fontWeight: 600 }}>
-      {title}
-    </Typography>
-    {subtitle && (
-      <Typography color="text.secondary" sx={{ mt: 1 }}>
-        {subtitle}
-      </Typography>
-    )}
-  </Box>
+  <div className="flex flex-col items-center justify-center py-10 text-center">
+    <p className="text-sm font-semibold text-gradient">{title}</p>
+    {subtitle && <p className="mt-2 text-xs text-white/50">{subtitle}</p>}
+  </div>
 );
 
 export default EmptyState;

@@ -1,18 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-* {
-  box-sizing: border-box;
+html,
+body,
+#root {
+  height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: 'Poppins', 'Segoe UI', sans-serif;
-  background: radial-gradient(circle at top, #fff5f0 0%, #fff7f4 40%, #fffaf8 100%);
-  color: #3b2f2a;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #000000;
+  color: #e0e0e0;
 }
 
-#root {
-  min-height: 100vh;
+.cyber-bg {
+  background-color: #000000;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(204, 0, 255, 0.1), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(255, 107, 107, 0.1), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(204, 0, 255, 0.08), transparent 55%);
+}
+
+.text-gradient {
+  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+  background-image: linear-gradient(90deg, #ff6b6b, #cc00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.font-display {
+  font-family: 'Lexend', 'Inter', system-ui, sans-serif;
+}
+
+.font-tech {
+  font-family: 'Chakra Petch', 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.glass-card {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.neon-border {
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+@keyframes zenPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
+  }
+  50% {
+    transform: scale(1.01);
+    box-shadow: 0 0 30px rgba(204, 0, 255, 0.3);
+  }
+}
+
+@keyframes zenFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.zen-pulse {
+  animation: zenPulse 6s ease-in-out infinite;
+}
+
+.zen-float {
+  animation: zenFloat 10s ease-in-out infinite;
+}
+
+.zen-quote {
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.18), rgba(204, 0, 255, 0.18));
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }

@@ -1,91 +1,74 @@
 import React from 'react';
-import {
-  Drawer,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Box,
-  Typography
-} from '@mui/material';
 import { NavLink } from 'react-router-dom';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import LinkIcon from '@mui/icons-material/Link';
-import YouTubeIcon from '@mui/icons-material/YouTube';
-import ChatIcon from '@mui/icons-material/Chat';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import SpaIcon from '@mui/icons-material/Spa';
-
-const drawerWidth = 260;
+import {
+  LayoutDashboard,
+  Rss,
+  Layers,
+  HelpCircle,
+  Link2,
+  Youtube,
+  MessageSquare,
+  Bell,
+  UserCircle,
+  Sparkles
+} from 'lucide-react';
+import { cn } from '../lib/cn';
 
 const navItems = [
-  { label: 'Dashboard', icon: <DashboardIcon />, to: '/' },
-  { label: 'Feed', icon: <DynamicFeedIcon />, to: '/feed' },
-  { label: 'Projects', icon: <WorkspacesIcon />, to: '/projects' },
-  { label: 'Q&A', icon: <QuestionAnswerIcon />, to: '/qa' },
-  { label: 'Links', icon: <LinkIcon />, to: '/links' },
-  { label: 'Tubes', icon: <YouTubeIcon />, to: '/tubes' },
-  { label: 'Moments of ZEN', icon: <SpaIcon />, to: '/zen' },
-  { label: 'Messages', icon: <ChatIcon />, to: '/messages' },
-  { label: 'Alerts', icon: <CampaignIcon />, to: '/alerts' },
-  { label: 'Profile', icon: <AccountCircleIcon />, to: '/profile' }
+  { label: 'Dashboard', icon: LayoutDashboard, to: '/' },
+  { label: 'Feed', icon: Rss, to: '/feed' },
+  { label: 'Projects', icon: Layers, to: '/projects' },
+  { label: 'Q&A', icon: HelpCircle, to: '/qa' },
+  { label: 'Links', icon: Link2, to: '/links' },
+  { label: 'Tubes', icon: Youtube, to: '/tubes' },
+  { label: 'Moments of ZEN', icon: Sparkles, to: '/zen' },
+  { label: 'Messages', icon: MessageSquare, to: '/messages' },
+  { label: 'Alerts', icon: Bell, to: '/alerts' },
+  { label: 'Profile', icon: UserCircle, to: '/profile' }
 ];
 
-const NavDrawer = ({ open, onClose, variant }) => (
-  <Drawer
-    variant={variant}
-    open={open}
-    onClose={onClose}
-    sx={{
-      width: drawerWidth,
-      flexShrink: 0,
-      '& .MuiDrawer-paper': {
-        width: drawerWidth,
-        boxSizing: 'border-box',
-        borderRight: 'none',
-        background: 'linear-gradient(180deg, #fff7f4 0%, #ffffff 100%)'
-      }
-    }}
+const NavDrawer = ({ open, onClose }) => (
+  <div
+    className={cn(
+      'fixed inset-y-0 left-0 z-40 w-64 transform border-r border-white/10 bg-black/80 backdrop-blur-2xl transition-transform duration-200 md:translate-x-0',
+      open ? 'translate-x-0' : '-translate-x-full'
+    )}
   >
-    <Toolbar>
-      <Box>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          CS&E Connect
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Department Hub
-        </Typography>
-      </Box>
-    </Toolbar>
-    <List sx={{ px: 2 }}>
-      {navItems.map((item) => (
-        <ListItemButton
-          key={item.to}
-          component={NavLink}
-          to={item.to}
-          sx={{
-            my: 0.6,
-            borderRadius: 999,
-            px: 2,
-            '&.active': {
-              backgroundColor: 'rgba(255, 173, 153, 0.35)',
-              '& .MuiListItemIcon-root': { color: 'primary.main' },
-              '& .MuiListItemText-primary': { fontWeight: 600 }
+    <div className="flex items-center justify-between px-6 py-5 md:py-6">
+      <div className="flex items-center gap-3">
+        <img
+          src="/logo.png"
+          alt="CS&E Connect"
+          className="h-10 w-auto rounded-[2px] object-contain"
+        />
+        <span className="sr-only">CS&E Connect</span>
+      </div>
+      <button className="text-white/60 md:hidden" onClick={onClose}>
+        ✕
+      </button>
+    </div>
+    <nav className="flex flex-col gap-2 px-4">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        return (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-[2px] px-3 py-2 text-[10px] uppercase tracking-[0.3em] text-white/50 font-extralight transition',
+                isActive ? 'bg-white/5 text-white shadow-glow' : 'hover:bg-white/5'
+              )
             }
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-          <ListItemText primary={item.label} />
-        </ListItemButton>
-      ))}
-    </List>
-  </Drawer>
+            onClick={onClose}
+          >
+            <Icon size={18} />
+            {item.label}
+          </NavLink>
+        );
+      })}
+    </nav>
+  </div>
 );
 
-export { drawerWidth };
 export default NavDrawer;

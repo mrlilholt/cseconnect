@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Button, TextField } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
+import { Send } from 'lucide-react';
+import Textarea from '../../../components/ui/Textarea';
+import Button from '../../../components/ui/Button';
 
 const AlertForm = ({ onSubmit, sending }) => {
   const [message, setMessage] = useState('');
@@ -12,19 +13,18 @@ const AlertForm = ({ onSubmit, sending }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <TextField
-        label="Alert message"
+    <div className="space-y-3">
+      <Textarea
+        rows={3}
         placeholder="All hands on deck: lab access issue."
-        multiline
-        minRows={3}
         value={message}
         onChange={(event) => setMessage(event.target.value)}
       />
-      <Button variant="contained" endIcon={<SendIcon />} onClick={handleSubmit} disabled={sending}>
+      <Button onClick={handleSubmit} disabled={sending}>
+        <Send size={14} />
         Broadcast alert
       </Button>
-    </Box>
+    </div>
   );
 };
 

@@ -1,22 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Alert,
-  IconButton,
-  TextField,
-  Stack
-} from '@mui/material';
-import GoogleIcon from '@mui/icons-material/Google';
-import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import { signInWithPopup, signInWithRedirect } from 'firebase/auth';
+import { Mail } from 'lucide-react';
 import { auth, provider } from '../lib/firebase';
 import { useAuth } from '../lib/auth';
 import { sanitizeEmail } from '../lib/allowlist';
+import Button from '../components/ui/Button';
+import Alert from '../components/ui/Alert';
 
 const SignInPage = () => {
   const { status, deniedEmail, deniedReason } = useAuth();
@@ -60,132 +50,68 @@ const SignInPage = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2,
-        background: 'radial-gradient(circle at top, #fff1ea 0%, #fff7f4 55%, #fffaf8 100%)'
-      }}
-    >
-      <Card
-        sx={{
-          maxWidth: 520,
-          width: '100%',
-          position: 'relative',
-          overflow: 'hidden',
-          borderRadius: 2,
-          boxShadow: '0 26px 60px rgba(255, 125, 110, 0.18)'
-        }}
-      >
-        <Box sx={{ position: 'relative', height: 220 }}>
-          <svg
-            viewBox="0 0 520 220"
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid slice"
-            style={{ position: 'absolute', inset: 0 }}
-          >
-            <defs>
-              <linearGradient id="sunset" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#FFE2D6" />
-                <stop offset="50%" stopColor="#FFB3A7" />
-                <stop offset="100%" stopColor="#FF8A7A" />
-              </linearGradient>
-            </defs>
-            <rect width="520" height="220" fill="url(#sunset)" />
-            <circle cx="420" cy="40" r="110" fill="rgba(255, 255, 255, 0.35)" />
-            <circle cx="90" cy="150" r="90" fill="rgba(255, 255, 255, 0.25)" />
-            <path
-              d="M0,150 C120,110 170,220 280,190 C380,165 430,120 520,140 L520,220 L0,220 Z"
-              fill="rgba(255, 125, 110, 0.25)"
-            />
-          </svg>
-        </Box>
-        <CardContent sx={{ p: { xs: 3, sm: 4 }, pt: 2 }}>
-          <Stack spacing={2.5}>
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 600 }}>
-                CS&E Connect
-              </Typography>
-              <Typography color="text.secondary">
-                Sign in with your department account to join the conversation.
-              </Typography>
-            </Box>
+    <div className="min-h-screen cyber-bg flex items-center justify-center px-4">
+      <div className="glass-card w-full max-w-lg rounded-[2px] border border-white/10 shadow-glow">
+        <div className="relative overflow-hidden rounded-[2px] border-b border-white/10 bg-black/50 p-6">
+          <div className="absolute inset-0 opacity-90">
+            <div className="absolute left-1/2 top-1/2 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-coral/40 to-neonpink/40 blur-2xl animate-pulseGlow" />
+            <div className="absolute left-1/2 top-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/20 animate-orbit" />
+            <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 animate-orbitSlow" />
+            <div className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10" />
+          </div>
+          <div className="relative">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="CS&E Connect logo" className="h-10 w-10 rounded-[2px]" />
+              <h1 className="text-2xl font-semibold text-gradient font-display">CS&E Connect</h1>
+            </div>
+            <p className="mt-2 text-sm text-holographic">
+              Sign in with your department account to join the conversation.
+            </p>
+          </div>
+        </div>
 
-            <TextField
-              variant="standard"
-              label="Department email"
+        <div className="p-6">
+          <label className="text-xs uppercase tracking-[0.2em] text-white/40">Department email</label>
+          <div className="mt-2 flex items-center gap-2 rounded-full border border-white/10 bg-black/40 px-3 py-2 backdrop-blur-xl">
+            <Mail size={16} className="text-white/50" />
+            <input
+              className="w-full bg-transparent text-sm text-holographic placeholder:text-white/30 focus:outline-none"
               placeholder="you@baldwinschool.org"
               value={emailHint}
               onChange={(event) => setEmailHint(event.target.value)}
-              fullWidth
-              InputProps={{
-                startAdornment: <MailOutlineIcon sx={{ mr: 1, color: 'text.secondary' }} />,
-                disableUnderline: false
-              }}
-              sx={{
-                '& .MuiInput-root:before': {
-                  borderBottom: '1px solid rgba(255, 173, 153, 0.6)'
-                },
-                '& .MuiInput-root:after': {
-                  borderBottom: '2px solid rgba(255, 125, 110, 0.9)'
-                }
-              }}
             />
+          </div>
 
-            {status === 'denied' && (
-              <Alert severity="warning">
-                {deniedEmail
-                  ? `Access not granted for ${deniedEmail}. Ensure this email is in src/config/members.js and the Firestore allowlist collection.`
-                  : 'Access not granted. Ensure your email is in src/config/members.js and the Firestore allowlist collection.'}
-                {deniedReason && (
-                  <Box sx={{ mt: 1, fontSize: '0.85rem' }}>Reason: {deniedReason}</Box>
-                )}
-                {deniedEmail && (
-                  <Box sx={{ mt: 0.5, fontSize: '0.85rem' }}>
-                    Allowlist doc ID: {sanitizeEmail(deniedEmail)}
-                  </Box>
-                )}
-              </Alert>
-            )}
-            {error && <Alert severity="error">{error}</Alert>}
+          {status === 'denied' && (
+            <Alert variant="warning" className="mt-4">
+              {deniedEmail
+                ? `Access not granted for ${deniedEmail}. Ensure this email is in src/config/members.js and the Firestore allowlist collection.`
+                : 'Access not granted. Ensure your email is in src/config/members.js and the Firestore allowlist collection.'}
+              {deniedReason && (
+                <div className="mt-2 text-xs text-white/60">Reason: {deniedReason}</div>
+              )}
+              {deniedEmail && (
+                <div className="mt-1 text-xs text-white/60">
+                  Allowlist doc ID: {sanitizeEmail(deniedEmail)}
+                </div>
+              )}
+            </Alert>
+          )}
+          {error && (
+            <Alert variant="error" className="mt-4">
+              {error}
+            </Alert>
+          )}
 
-            <Button
-              variant="contained"
-              startIcon={<GoogleIcon />}
-              onClick={handleSignIn}
-              fullWidth
-              size="large"
-              sx={{ py: 1.4, borderRadius: 999, boxShadow: '0 12px 24px rgba(255, 125, 110, 0.25)' }}
-            >
-              Sign in with Google
-            </Button>
-
-            <Box>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                Other sign-in options
-              </Typography>
-              <Stack direction="row" spacing={1.5}>
-                <IconButton
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    border: '1px solid rgba(255, 173, 153, 0.6)',
-                    backgroundColor: '#fff'
-                  }}
-                  onClick={handleSignIn}
-                >
-                  <GoogleIcon />
-                </IconButton>
-              </Stack>
-            </Box>
-          </Stack>
-        </CardContent>
-      </Card>
-    </Box>
+          <Button className="mt-6 w-full" onClick={handleSignIn}>
+            Sign in with Google
+          </Button>
+          <p className="mt-4 text-xs text-white/40">
+            By signing in you agree to department access policies.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 };
 

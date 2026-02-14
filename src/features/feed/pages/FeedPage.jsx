@@ -1,37 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Button,
-  Snackbar,
-  Alert,
-  Skeleton,
-  Typography,
-  Fab,
-  Paper,
-  IconButton,
-  useMediaQuery
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
-import ChatIcon from '@mui/icons-material/Chat';
+import { Plus, Rss, MessageCircle } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../lib/auth';
 import { createFeedPost, deleteFeedPost, subscribeToFeedPosts, updateFeedPost } from '../api';
 import FeedPostCard from '../components/FeedPostCard';
 import NewPostDialog from '../components/NewPostDialog';
 import EmptyState from '../../../components/EmptyState';
-import { drawerWidth } from '../../../components/NavDrawer';
+import Button from '../../../components/ui/Button';
+import Card from '../../../components/ui/Card';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const FeedPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToFeedPosts((items) => {
@@ -42,7 +29,8 @@ const FeedPage = () => {
   }, []);
 
   const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+    setSnackbar({ message, severity });
+    setTimeout(() => setSnackbar(null), 3000);
   };
 
   const handleCreate = async ({ text, imageUrl }) => {
@@ -88,23 +76,24 @@ const FeedPage = () => {
   const navActive = (path) => location.pathname === path;
 
   return (
-    <Box sx={{ pb: 14 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Department Feed
-          </Typography>
-          <Typography color="text.secondary">Catch up on quick updates from the team.</Typography>
-        </Box>
-        {!isMobile && (
-          <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}>
-            New post
-          </Button>
-        )}
-      </Box>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-gradient">Department Feed</h2>
+          <p className="text-sm text-white/50">Catch up on quick updates from the team.</p>
+        </div>
+        <Button onClick={openCreate}>
+          <Plus size={16} />
+          New post
+        </Button>
+      </div>
 
       {loading ? (
-        [0, 1, 2].map((item) => <Skeleton key={item} height={220} sx={{ mb: 2 }} />)
+        <div className="space-y-4">
+          {[0, 1, 2].map((item) => (
+            <Skeleton key={item} className="h-48 w-full" />
+          ))}
+        </div>
       ) : posts.length === 0 ? (
         <EmptyState title="No posts yet" subtitle="Share the first update with the department." />
       ) : (
@@ -120,62 +109,33 @@ const FeedPage = () => {
         initialPost={editingPost}
       />
 
-      <Paper
-        elevation={0}
-        sx={{
-          position: 'fixed',
-          left: { xs: 16, md: drawerWidth + 16 },
-          right: { xs: 16, md: 24 },
-          bottom: 24,
-          height: 68,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: 3,
-          borderRadius: 999,
-          border: '1px solid rgba(255, 173, 153, 0.45)',
-          backgroundColor: 'rgba(255, 255, 255, 0.92)',
-          backdropFilter: 'blur(8px)',
-          boxShadow: '0 16px 40px rgba(255, 125, 110, 0.18)'
-        }}
-      >
-        <IconButton
+      <Card className="fixed bottom-6 left-1/2 z-20 flex w-[90%] max-w-lg -translate-x-1/2 items-center justify-between px-6 py-3 rounded-full">
+        <button
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${navActive('/feed') ? 'bg-white/10 text-coral' : 'text-white/60'}`}
           onClick={() => navigate('/feed')}
-          sx={{
-            color: navActive('/feed') ? 'primary.main' : 'text.secondary',
-            backgroundColor: navActive('/feed') ? 'rgba(255, 173, 153, 0.2)' : 'transparent'
-          }}
         >
-          <DynamicFeedIcon />
-        </IconButton>
-        <Fab
-          color="primary"
+          <Rss size={18} />
+        </button>
+        <button
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-coral to-neonpink shadow-glow"
           onClick={openCreate}
-          sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}
         >
-          <AddIcon />
-        </Fab>
-        <IconButton
+          <Plus size={20} />
+        </button>
+        <button
+          className={`flex h-10 w-10 items-center justify-center rounded-full ${navActive('/messages') ? 'bg-white/10 text-coral' : 'text-white/60'}`}
           onClick={() => navigate('/messages')}
-          sx={{
-            color: navActive('/messages') ? 'primary.main' : 'text.secondary',
-            backgroundColor: navActive('/messages') ? 'rgba(255, 173, 153, 0.2)' : 'transparent'
-          }}
         >
-          <ChatIcon />
-        </IconButton>
-      </Paper>
+          <MessageCircle size={18} />
+        </button>
+      </Card>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6 rounded-[2px] border border-white/10 bg-black/70 px-4 py-2 text-xs text-white/80">
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

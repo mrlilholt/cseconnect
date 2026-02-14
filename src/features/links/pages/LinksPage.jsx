@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Snackbar, Alert, Skeleton, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../../lib/auth';
 import { createLink, deleteLink, subscribeToLinks, updateLink } from '../api';
 import LinkDialog from '../components/LinkDialog';
 import LinkCard from '../components/LinkCard';
 import EmptyState from '../../../components/EmptyState';
+import Button from '../../../components/ui/Button';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const LinksPage = () => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const LinksPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingLink, setEditingLink] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToLinks((items) => {
@@ -23,8 +24,9 @@ const LinksPage = () => {
     return () => unsub();
   }, []);
 
-  const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+  const showMessage = (message) => {
+    setSnackbar({ message });
+    setTimeout(() => setSnackbar(null), 3000);
   };
 
   const handleCreate = async (payload) => {
@@ -33,7 +35,7 @@ const LinksPage = () => {
       setDialogOpen(false);
       showMessage('Link saved.');
     } catch (error) {
-      showMessage(error.message || 'Unable to save link.', 'error');
+      showMessage(error.message || 'Unable to save link.');
     }
   };
 
@@ -44,7 +46,7 @@ const LinksPage = () => {
       setDialogOpen(false);
       showMessage('Link updated.');
     } catch (error) {
-      showMessage(error.message || 'Unable to update link.', 'error');
+      showMessage(error.message || 'Unable to update link.');
     }
   };
 
@@ -53,50 +55,46 @@ const LinksPage = () => {
       await deleteLink(linkId);
       showMessage('Link deleted.');
     } catch (error) {
-      showMessage(error.message || 'Unable to delete link.', 'error');
+      showMessage(error.message || 'Unable to delete link.');
     }
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Saved Links
-          </Typography>
-          <Typography color="text.secondary">Curate articles and videos for the team.</Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-gradient">Saved Links</h2>
+          <p className="text-sm text-white/50">Curate articles and videos for the team.</p>
+        </div>
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus size={14} />
           Save link
         </Button>
-      </Box>
+      </div>
 
       {loading ? (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2, 3].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={item}>
-              <Skeleton height={160} />
-            </Grid>
+            <Skeleton key={item} className="h-40 w-full" />
           ))}
-        </Grid>
+        </div>
       ) : links.length === 0 ? (
         <EmptyState title="No links yet" subtitle="Save an article or video for the team." />
       ) : (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {links.map((linkItem) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={linkItem.id}>
-              <LinkCard
-                linkItem={linkItem}
-                canEdit={linkItem.authorUid === user.uid}
-                onEdit={(item) => {
-                  setEditingLink(item);
-                  setDialogOpen(true);
-                }}
-                onDelete={handleDelete}
-              />
-            </Grid>
+            <LinkCard
+              key={linkItem.id}
+              linkItem={linkItem}
+              canEdit={linkItem.authorUid === user.uid}
+              onEdit={(item) => {
+                setEditingLink(item);
+                setDialogOpen(true);
+              }}
+              onDelete={handleDelete}
+            />
           ))}
-        </Grid>
+        </div>
       )}
 
       <LinkDialog
@@ -109,16 +107,12 @@ const LinksPage = () => {
         initialLink={editingLink}
       />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6 rounded-[2px] border border-white/10 bg-black/70 px-4 py-2 text-xs text-white/80">
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

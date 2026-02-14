@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import AppShell from './components/AppShell';
 import ProtectedRoute from './components/ProtectedRoute';
 import DashboardPage from './pages/DashboardPage';
@@ -14,6 +14,16 @@ import TubesPage from './features/tubes/pages/TubesPage';
 import ChatPage from './features/chat/pages/ChatPage';
 import AlertsPage from './features/alerts/pages/AlertsPage';
 import ZenPage from './features/zen/pages/ZenPage';
+
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+
+  return null;
+};
 
 const App = () => {
   useEffect(() => {
@@ -39,6 +49,7 @@ const App = () => {
 
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+      <ScrollToTop />
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
         <Route element={<ProtectedRoute />}>

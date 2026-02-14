@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  IconButton
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
 import TagInput from '../../../components/TagInput';
 
 const QuestionDialog = ({ open, onClose, onSubmit, initialQuestion }) => {
@@ -38,31 +32,27 @@ const QuestionDialog = ({ open, onClose, onSubmit, initialQuestion }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {initialQuestion ? 'Edit question' : 'New question'}
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField label="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <TextField
-          label="Question details"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          multiline
-          minRows={4}
-        />
+    <Modal
+      open={open}
+      title={initialQuestion ? 'Edit question' : 'Ask a question'}
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            {initialQuestion ? 'Save changes' : 'Post question'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Question title" />
+        <Textarea rows={4} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Question details" />
         <TagInput tags={tags} onChange={setTags} />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {initialQuestion ? 'Save changes' : 'Post question'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   );
 };
 

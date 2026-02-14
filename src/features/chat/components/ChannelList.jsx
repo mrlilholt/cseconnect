@@ -1,52 +1,33 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  List,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  Card,
-  CardContent
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
 
 const ChannelList = ({ channels, selectedId, onSelect, onCreate }) => (
-  <Card sx={{ borderRadius: 2, border: '1px solid rgba(255, 173, 153, 0.2)' }}>
-    <CardContent>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-          Channels
-        </Typography>
-        <Button size="small" startIcon={<AddIcon />} onClick={onCreate}>
-          New
-        </Button>
-      </Box>
-      <List dense sx={{ borderRadius: 2, overflow: 'hidden' }}>
-        {channels.map((channel) => (
-          <ListItemButton
-            key={channel.id}
-            selected={channel.id === selectedId}
-            onClick={() => onSelect(channel)}
-            sx={{
-              borderRadius: 2,
-              my: 0.5,
-              '&.Mui-selected': {
-                backgroundColor: 'rgba(255, 173, 153, 0.3)',
-                '&:hover': { backgroundColor: 'rgba(255, 173, 153, 0.35)' }
-              }
-            }}
-          >
-            <ListItemText primary={channel.name} />
-          </ListItemButton>
-        ))}
-        {channels.length === 0 && (
-          <Typography color="text.secondary" sx={{ p: 2 }}>
-            No channels yet.
-          </Typography>
-        )}
-      </List>
-    </CardContent>
+  <Card className="rounded-[2px]">
+    <div className="flex items-center justify-between">
+      <p className="text-sm font-semibold text-gradient">Channels</p>
+      <Button size="sm" variant="outline" onClick={onCreate}>
+        <Plus size={14} />
+        New
+      </Button>
+    </div>
+    <div className="mt-3 space-y-2">
+      {channels.map((channel) => (
+        <button
+          key={channel.id}
+          onClick={() => onSelect(channel)}
+          className={`w-full rounded-[2px] px-3 py-2 text-left text-xs ${
+            channel.id === selectedId
+              ? 'bg-white/10 text-white shadow-glow'
+              : 'text-white/60 hover:bg-white/5'
+          }`}
+        >
+          #{channel.name}
+        </button>
+      ))}
+      {channels.length === 0 && <p className="text-xs text-white/40">No channels yet.</p>}
+    </div>
   </Card>
 );
 

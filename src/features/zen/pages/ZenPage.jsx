@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Snackbar, Alert, Skeleton, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../../lib/auth';
-import { createZenMoment, deleteZenMoment, subscribeToZenMoments, updateZenMoment } from '../api';
+import {
+  createZenMoment,
+  deleteZenMoment,
+  maybeSeedHourlyQuote,
+  subscribeToZenMoments,
+  updateZenMoment
+} from '../api';
 import ZenDialog from '../components/ZenDialog';
 import ZenCard from '../components/ZenCard';
 import EmptyState from '../../../components/EmptyState';
+import Button from '../../../components/ui/Button';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const ZenPage = () => {
   const { user } = useAuth();
@@ -13,7 +20,7 @@ const ZenPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMoment, setEditingMoment] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToZenMoments((items) => {
@@ -23,8 +30,23 @@ const ZenPage = () => {
     return () => unsub();
   }, []);
 
-  const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+  useEffect(() => {
+    let mounted = true;
+    const seed = () =>
+      maybeSeedHourlyQuote().catch(() => {
+        if (!mounted) return;
+      });
+    seed();
+    const interval = setInterval(seed, 15 * 60 * 1000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const showMessage = (message) => {
+    setSnackbar({ message });
+    setTimeout(() => setSnackbar(null), 3000);
   };
 
   const handleCreate = async (payload) => {
@@ -33,7 +55,7 @@ const ZenPage = () => {
       setDialogOpen(false);
       showMessage('Moment shared.');
     } catch (error) {
-      showMessage(error.message || 'Unable to share moment.', 'error');
+      showMessage(error.message || 'Unable to share moment.');
     }
   };
 
@@ -44,7 +66,7 @@ const ZenPage = () => {
       setDialogOpen(false);
       showMessage('Moment updated.');
     } catch (error) {
-      showMessage(error.message || 'Unable to update moment.', 'error');
+      showMessage(error.message || 'Unable to update moment.');
     }
   };
 
@@ -53,52 +75,55 @@ const ZenPage = () => {
       await deleteZenMoment(momentId);
       showMessage('Moment deleted.');
     } catch (error) {
-      showMessage(error.message || 'Unable to delete moment.', 'error');
+      showMessage(error.message || 'Unable to delete moment.');
     }
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Moments of ZEN
-          </Typography>
-          <Typography color="text.secondary">
-            Capture calm, gratitude, or small wins from the department.
-          </Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-gradient">Moments of ZEN</h2>
+          <p className="text-sm text-white/50">Capture calm, gratitude, or small wins.</p>
+          <p className="mt-1 text-xs text-white/40">Zen bot refreshes quotes every 15 minutes.</p>
+          <a
+            href="https://quoteslate.vercel.app"
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 inline-flex text-[10px] text-coral"
+          >
+            Quotes powered by the QuoteSlate API
+          </a>
+        </div>
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus size={14} />
           Share moment
         </Button>
-      </Box>
+      </div>
 
       {loading ? (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 md:grid-cols-2">
           {[0, 1, 2].map((item) => (
-            <Grid item xs={12} md={6} key={item}>
-              <Skeleton height={180} />
-            </Grid>
+            <Skeleton key={item} className="h-40 w-full" />
           ))}
-        </Grid>
+        </div>
       ) : moments.length === 0 ? (
         <EmptyState title="No moments yet" subtitle="Share the first moment of calm." />
       ) : (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 md:grid-cols-2">
           {moments.map((moment) => (
-            <Grid item xs={12} md={6} key={moment.id}>
-              <ZenCard
-                moment={moment}
-                canEdit={moment.authorUid === user.uid}
-                onEdit={(item) => {
-                  setEditingMoment(item);
-                  setDialogOpen(true);
-                }}
-                onDelete={handleDelete}
-              />
-            </Grid>
+            <ZenCard
+              key={moment.id}
+              moment={moment}
+              canEdit={moment.authorUid === user.uid}
+              onEdit={(item) => {
+                setEditingMoment(item);
+                setDialogOpen(true);
+              }}
+              onDelete={handleDelete}
+            />
           ))}
-        </Grid>
+        </div>
       )}
 
       <ZenDialog
@@ -111,16 +136,12 @@ const ZenPage = () => {
         initialMoment={editingMoment}
       />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6 rounded-[2px] border border-white/10 bg-black/70 px-4 py-2 text-xs text-white/80">
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

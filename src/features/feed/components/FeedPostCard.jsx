@@ -1,47 +1,31 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Avatar,
-  Box,
-  Card,
-  CardContent,
-  IconButton,
-  Stack,
-  TextField,
-  Typography,
-  Button,
-  Divider
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import SendIcon from '@mui/icons-material/Send';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined';
-import CelebrationOutlinedIcon from '@mui/icons-material/CelebrationOutlined';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+  Heart,
+  ThumbsUp,
+  Sparkles,
+  MessageCircle,
+  Share2,
+  Trash2,
+  Edit3,
+  Send
+} from 'lucide-react';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { addComment, deleteComment, subscribeToComments, toggleReaction } from '../api';
 import { useAuth } from '../../../lib/auth';
 import { formatDateTime } from '../../../lib/time';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Avatar from '../../../components/ui/Avatar';
+import Input from '../../../components/ui/Input';
 
-const IconReactionButton = ({ icon, count, active, onClick }) => (
-  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-    <IconButton
-      size="small"
-      onClick={onClick}
-      sx={{
-        color: active ? 'primary.main' : 'text.secondary',
-        backgroundColor: active ? 'rgba(255, 173, 153, 0.2)' : 'transparent'
-      }}
-    >
-      {icon}
-    </IconButton>
-    {typeof count === 'number' && count > 0 && (
-      <Typography variant="caption" color="text.secondary">
-        {count}
-      </Typography>
-    )}
-  </Box>
+const IconReactionButton = ({ icon: Icon, count, active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-1 text-xs ${active ? 'text-coral' : 'text-white/50'} hover:text-coral`}
+  >
+    <Icon size={16} />
+    {typeof count === 'number' && count > 0 && <span>{count}</span>}
+  </button>
 );
 
 const FeedPostCard = ({ post, onDelete, onEdit }) => {
@@ -82,154 +66,101 @@ const FeedPostCard = ({ post, onDelete, onEdit }) => {
   };
 
   return (
-    <Card
-      sx={{
-        mb: 3,
-        borderRadius: 2,
-        border: '1px solid rgba(255, 173, 153, 0.2)',
-        boxShadow: '0 18px 45px rgba(255, 125, 110, 0.15)'
-      }}
-    >
-      <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
-        <Stack direction="row" spacing={2} alignItems="flex-start">
-          <Box
-            sx={{
-              p: 0.4,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(255,173,153,0.9), rgba(255,125,110,0.85))'
-            }}
-          >
-            <Avatar src={post.authorPhoto || ''} sx={{ width: 48, height: 48 }}>
-              {post.authorName?.[0] || 'U'}
-            </Avatar>
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {post.authorName}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {formatDateTime(post.createdAt)}
-                </Typography>
-              </Box>
-              {isAuthor && (
-                <Stack direction="row" spacing={1}>
-                  <IconButton onClick={() => onEdit(post)} size="small">
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton onClick={() => setConfirmOpen(true)} size="small" color="error">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
-              )}
-            </Stack>
-            <Typography sx={{ mt: 2, whiteSpace: 'pre-wrap' }}>{post.text}</Typography>
-            {post.imageUrl && (
-              <Box
-                sx={{
-                  mt: 2,
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  border: '1px solid rgba(255, 173, 153, 0.25)',
-                  maxHeight: { xs: 240, sm: 280, md: 320 },
-                  backgroundColor: '#fff'
-                }}
-              >
-                <Box
-                  component="img"
-                  src={post.imageUrl}
-                  alt="Post"
-                  sx={{
-                    width: '100%',
-                    height: '100%',
-                    maxHeight: { xs: 240, sm: 280, md: 320 },
-                    objectFit: 'contain',
-                    display: 'block'
-                  }}
-                />
-              </Box>
+    <Card className="rounded-[2px]">
+      <div className="flex items-start gap-4">
+        <Avatar src={post.authorPhoto || ''} fallback={post.authorName?.[0] || 'U'} className="h-11 w-11" />
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-white">{post.authorName}</p>
+              <p className="text-xs text-white/40">{formatDateTime(post.createdAt)}</p>
+            </div>
+            {isAuthor && (
+              <div className="flex items-center gap-2 text-white/50">
+                <button onClick={() => onEdit(post)}>
+                  <Edit3 size={16} />
+                </button>
+                <button onClick={() => setConfirmOpen(true)} className="text-coral">
+                  <Trash2 size={16} />
+                </button>
+              </div>
             )}
-            <Stack direction="row" spacing={2} sx={{ mt: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-              <IconReactionButton
-                icon={<ThumbUpAltOutlinedIcon fontSize="small" />}
-                count={reactionCounts.like}
-                active={userReaction === 'like'}
-                onClick={() => handleReaction('like')}
+          </div>
+          <p className="mt-3 text-sm text-white/80 whitespace-pre-wrap">{post.text}</p>
+          {post.imageUrl && (
+            <div className="mt-3 overflow-hidden rounded-[2px] border border-white/10 bg-black/60 shadow-glow">
+              <img
+                src={post.imageUrl}
+                alt="Post"
+                className="h-60 w-full object-contain"
               />
-              <IconReactionButton
-                icon={<FavoriteBorderIcon fontSize="small" />}
-                count={reactionCounts.love}
-                active={userReaction === 'love'}
-                onClick={() => handleReaction('love')}
-              />
-              <IconReactionButton
-                icon={<CelebrationOutlinedIcon fontSize="small" />}
-                count={reactionCounts.celebrate}
-                active={userReaction === 'celebrate'}
-                onClick={() => handleReaction('celebrate')}
-              />
-              <IconReactionButton
-                icon={<ChatBubbleOutlineIcon fontSize="small" />}
-                onClick={() => commentRef.current?.focus()}
-              />
-              <IconReactionButton icon={<ShareOutlinedIcon fontSize="small" />} onClick={handleShare} />
-            </Stack>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-              Comments
-            </Typography>
-            <Stack spacing={1}>
+            </div>
+          )}
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <IconReactionButton
+              icon={ThumbsUp}
+              count={reactionCounts.like}
+              active={userReaction === 'like'}
+              onClick={() => handleReaction('like')}
+            />
+            <IconReactionButton
+              icon={Heart}
+              count={reactionCounts.love}
+              active={userReaction === 'love'}
+              onClick={() => handleReaction('love')}
+            />
+            <IconReactionButton
+              icon={Sparkles}
+              count={reactionCounts.celebrate}
+              active={userReaction === 'celebrate'}
+              onClick={() => handleReaction('celebrate')}
+            />
+            <button
+              className="flex items-center gap-1 text-xs text-white/50 hover:text-coral"
+              onClick={() => commentRef.current?.focus()}
+            >
+              <MessageCircle size={16} />
+            </button>
+            <button className="flex items-center gap-1 text-xs text-white/50 hover:text-coral" onClick={handleShare}>
+              <Share2 size={16} />
+            </button>
+          </div>
+          <div className="mt-4 border-t border-white/10 pt-4">
+            <p className="text-xs font-semibold text-white/70">Comments</p>
+            <div className="mt-2 space-y-2">
               {comments.map((comment) => (
-                <Box
-                  key={comment.id}
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: 2,
-                    p: 1.5,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(255, 173, 153, 0.12)'
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {comment.authorName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {comment.text}
-                    </Typography>
-                  </Box>
+                <div key={comment.id} className="flex items-start justify-between gap-2 rounded-[2px] bg-white/5 px-3 py-2">
+                  <div>
+                    <p className="text-xs font-semibold text-white/80">{comment.authorName}</p>
+                    <p className="text-xs text-white/60">{comment.text}</p>
+                  </div>
                   {comment.authorUid === user?.uid && (
-                    <IconButton size="small" onClick={() => handleDeleteComment(comment.id)}>
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
+                    <button className="text-white/40" onClick={() => handleDeleteComment(comment.id)}>
+                      <Trash2 size={14} />
+                    </button>
                   )}
-                </Box>
+                </div>
               ))}
               {comments.length === 0 && (
-                <Typography variant="body2" color="text.secondary">
-                  Start the conversation.
-                </Typography>
+                <p className="text-xs text-white/40">Start the conversation.</p>
               )}
-            </Stack>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2 }}>
-              <TextField
-                inputRef={commentRef}
+            </div>
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <Input
+                className="rounded-[2px]"
+                ref={commentRef}
                 value={commentText}
                 onChange={(event) => setCommentText(event.target.value)}
                 placeholder="Write a comment"
-                size="small"
-                fullWidth
               />
-              <Button variant="contained" onClick={handleCommentSubmit} endIcon={<SendIcon />}>
+              <Button size="sm" onClick={handleCommentSubmit}>
+                <Send size={14} />
                 Comment
               </Button>
-            </Stack>
-          </Box>
-        </Stack>
-      </CardContent>
+            </div>
+          </div>
+        </div>
+      </div>
       <ConfirmDialog
         open={confirmOpen}
         title="Delete post?"

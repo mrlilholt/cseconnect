@@ -1,40 +1,30 @@
 import React from 'react';
-import { Card, CardContent, Chip, Stack, Typography, Box } from '@mui/material';
+import Card from '../../../components/ui/Card';
 import { formatDateTime } from '../../../lib/time';
 
 const statusColor = {
-  sent: 'success',
-  skipped: 'warning',
-  failed: 'error'
+  sent: 'text-emerald-300',
+  skipped: 'text-coral',
+  failed: 'text-red-300'
 };
 
 const AlertsList = ({ alerts }) => (
-  <Stack spacing={2}>
+  <div className="space-y-3">
     {alerts.map((alert) => (
-      <Card key={alert.id} sx={{ borderRadius: 2, border: '1px solid rgba(255, 173, 153, 0.2)' }}>
-        <CardContent>
-          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems="center" spacing={2}>
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {alert.message}
-              </Typography>
-              <Typography color="text.secondary" sx={{ mt: 1 }}>
-                {formatDateTime(alert.createdAt)}
-              </Typography>
-              {alert.smsError && (
-                <Typography color="error" sx={{ mt: 1 }}>
-                  {alert.smsError}
-                </Typography>
-              )}
-            </Box>
-            {alert.smsStatus && (
-              <Chip label={alert.smsStatus} color={statusColor[alert.smsStatus]} size="small" />
-            )}
-          </Stack>
-        </CardContent>
+      <Card key={alert.id} className="rounded-[2px]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-white">{alert.message}</p>
+            <p className="mt-1 text-xs text-white/40">{formatDateTime(alert.createdAt)}</p>
+            {alert.smsError && <p className="mt-1 text-xs text-red-300">{alert.smsError}</p>}
+          </div>
+          {alert.smsStatus && (
+            <span className={`text-xs font-semibold ${statusColor[alert.smsStatus]}`}>{alert.smsStatus}</span>
+          )}
+        </div>
       </Card>
     ))}
-  </Stack>
+  </div>
 );
 
 export default AlertsList;

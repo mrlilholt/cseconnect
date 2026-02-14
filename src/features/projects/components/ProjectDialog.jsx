@@ -1,25 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  MenuItem,
-  Box,
-  IconButton,
-  Stack
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
-
-const statusOptions = [
-  { value: 'idea', label: 'Idea' },
-  { value: 'in_progress', label: 'In progress' },
-  { value: 'shipping', label: 'Shipping' },
-  { value: 'done', label: 'Done' }
-];
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
 
 const ProjectDialog = ({ open, onClose, onSubmit, initialProject }) => {
   const [title, setTitle] = useState('');
@@ -32,7 +15,7 @@ const ProjectDialog = ({ open, onClose, onSubmit, initialProject }) => {
       setTitle(initialProject.title || '');
       setDescription(initialProject.description || '');
       setStatus(initialProject.status || 'idea');
-      setLinks(initialProject.links?.length ? initialProject.links : [{ label: '', url: '' }]);
+      setLinks(initialProject.links || [{ label: '', url: '' }]);
     } else {
       setTitle('');
       setDescription('');
@@ -41,95 +24,102 @@ const ProjectDialog = ({ open, onClose, onSubmit, initialProject }) => {
     }
   }, [initialProject, open]);
 
-  const updateLink = (index, field, value) => {
-    const next = [...links];
-    next[index] = { ...next[index], [field]: value };
-    setLinks(next);
-  };
-
-  const addLink = () => setLinks([...links, { label: '', url: '' }]);
-
-  const removeLink = (index) => {
-    setLinks(links.filter((_, idx) => idx !== index));
-  };
-
   const handleSubmit = () => {
     if (!title.trim()) return;
-    const sanitizedLinks = links.filter((link) => link.label.trim() && link.url.trim());
     onSubmit({
       title: title.trim(),
       description: description.trim(),
       status,
-      links: sanitizedLinks
+      links: links.filter((link) => link.label && link.url)
     });
   };
 
+  const updateLink = (index, key, value) => {
+    setLinks((prev) => prev.map((link, i) => (i === index ? { ...link, [key]: value } : link)));
+  };
+
+  const addLink = () => {
+    setLinks((prev) => [...prev, { label: '', url: '' }]);
+  };
+
+  const removeLink = (index) => {
+    setLinks((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {initialProject ? 'Edit project' : 'New project'}
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField label="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <TextField
-          label="Description"
+    <Modal
+      open={open}
+      title={initialProject ? 'Edit project' : 'New project'}
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            {initialProject ? 'Save changes' : 'Create project'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Project title" />
+        <Textarea
+          rows={3}
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          multiline
-          minRows={3}
+          placeholder="Describe the project"
         />
-        <TextField
-          select
-          label="Status"
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
-        >
-          {statusOptions.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-        <Box>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-            <Box sx={{ fontWeight: 600 }}>Links</Box>
-            <Button onClick={addLink}>Add link</Button>
-          </Stack>
-          <Stack spacing={1}>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-white/40">Status</label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {['idea', 'in_progress', 'shipping', 'done'].map((value) => (
+              <button
+                key={value}
+                onClick={() => setStatus(value)}
+                className={`rounded-full px-3 py-1 text-xs ${
+                  status === value ? 'bg-gradient-to-r from-coral to-neonpink text-white shadow-glow' : 'border border-white/10 text-white/50'
+                }`}
+              >
+                {value.replace('_', ' ')}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="text-xs uppercase tracking-[0.2em] text-white/40">Links</label>
+          <div className="mt-2 space-y-2">
             {links.map((link, index) => (
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} key={`${index}-${link.label}`}>
-                <TextField
-                  label="Label"
+              <div key={index} className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  className="rounded-[2px]"
                   value={link.label}
                   onChange={(event) => updateLink(index, 'label', event.target.value)}
-                  fullWidth
+                  placeholder="Label"
                 />
-                <TextField
-                  label="URL"
+                <Input
+                  className="rounded-[2px]"
                   value={link.url}
                   onChange={(event) => updateLink(index, 'url', event.target.value)}
-                  fullWidth
+                  placeholder="URL"
                 />
                 {links.length > 1 && (
-                  <IconButton onClick={() => removeLink(index)} color="error">
-                    <DeleteIcon />
-                  </IconButton>
+                  <button
+                    className="text-xs text-coral"
+                    onClick={() => removeLink(index)}
+                  >
+                    Remove
+                  </button>
                 )}
-              </Stack>
+              </div>
             ))}
-          </Stack>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {initialProject ? 'Save changes' : 'Create project'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+          </div>
+          <Button variant="outline" size="sm" className="mt-2" onClick={addLink}>
+            Add link
+          </Button>
+        </div>
+      </div>
+    </Modal>
   );
 };
 

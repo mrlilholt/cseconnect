@@ -1,18 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-  IconButton,
-  Box,
-  Button
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline';
-import YouTubeIcon from '@mui/icons-material/YouTube';
+import { PlayCircle, Trash2, Edit3, Youtube } from 'lucide-react';
+import Card from '../../../components/ui/Card';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import { extractYouTubeId, getYouTubeThumbnail } from '../utils';
 
@@ -22,172 +10,63 @@ const TubeCard = ({ tube, canEdit, onEdit, onDelete }) => {
   const thumbnail = useMemo(() => getYouTubeThumbnail(videoId), [videoId]);
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        borderRadius: '1px',
-        border: '1px solid rgba(255, 173, 153, 0.2)',
-        display: 'flex',
-        flexDirection: 'column'
-      }}
-    >
-      <CardContent sx={{ p: 1.75, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <Box
-          sx={{
-            borderRadius: '1px',
-            border: '1px solid rgba(255, 173, 153, 0.25)',
-            overflow: 'hidden',
-            backgroundColor: '#fff8f4',
-            mb: 1.25
-          }}
-        >
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              px: 1.5,
-              py: 0.75,
-              backgroundColor: 'rgba(255, 173, 153, 0.15)',
-              borderBottom: '1px solid rgba(255, 173, 153, 0.2)'
-            }}
-          >
-            <Stack direction="row" spacing={1}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#FF7D6E' }} />
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#FFAD99' }} />
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#F2B166' }} />
-            </Stack>
-            <Button
-              component="a"
-              href={tube.url}
-              target="_blank"
-              rel="noreferrer"
-              size="small"
-              variant="outlined"
-              sx={{ borderRadius: '1px', px: 1.5, minWidth: 0, fontSize: '0.75rem' }}
-            >
-              Open
-            </Button>
-          </Box>
-          <Box
-            component="a"
-            href={tube.url}
-            target="_blank"
-            rel="noreferrer"
-            sx={{
-              position: 'relative',
-              display: 'block',
-              height: { xs: 130, md: 140, lg: 150 },
-              backgroundColor: '#fff',
-              textDecoration: 'none'
-            }}
-          >
-            {thumbnail ? (
-              <Box
-                component="img"
-                src={thumbnail}
-                alt={tube.title}
-                loading="lazy"
-                sx={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'text.secondary',
-                  fontSize: '0.85rem'
-                }}
-              >
-                Preview unavailable
-              </Box>
-            )}
-            <Box
-              sx={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#fff',
-                background: 'linear-gradient(0deg, rgba(0,0,0,0.45), rgba(0,0,0,0.05))'
-              }}
-            >
-              <PlayCircleOutlineIcon sx={{ fontSize: 44 }} />
-            </Box>
-          </Box>
-        </Box>
-
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Box
-              sx={{
-                width: 32,
-                height: 32,
-                borderRadius: '1px',
-                backgroundColor: 'rgba(255, 173, 153, 0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'primary.main'
-              }}
-            >
-              <YouTubeIcon />
-            </Box>
-            <Box>
-              <Typography
-                variant="subtitle1"
-                sx={{
-                  fontWeight: 600,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 1,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}
-              >
-                {tube.title}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {videoId ? `YouTube • ${videoId}` : 'YouTube'}
-              </Typography>
-            </Box>
-          </Box>
-          {canEdit && (
-            <Stack direction="row" spacing={1}>
-              <IconButton size="small" onClick={() => onEdit(tube)}>
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" color="error" onClick={() => setConfirmOpen(true)}>
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Stack>
+    <Card className="rounded-[2px]">
+      <div className="rounded-[2px] border border-white/10 bg-black/50">
+        <div className="flex items-center justify-between border-b border-white/10 px-3 py-2 text-xs text-white/50">
+          <div className="flex gap-2">
+            <span className="h-2 w-2 rounded-full bg-coral" />
+            <span className="h-2 w-2 rounded-full bg-neonpink" />
+            <span className="h-2 w-2 rounded-full bg-white/30" />
+          </div>
+          <a href={tube.url} target="_blank" rel="noreferrer" className="text-coral">
+            Open
+          </a>
+        </div>
+        <a href={tube.url} target="_blank" rel="noreferrer" className="relative block h-36 bg-black">
+          {thumbnail ? (
+            <img src={thumbnail} alt={tube.title} className="h-full w-full object-cover" loading="lazy" />
+          ) : (
+            <div className="flex h-full items-center justify-center text-xs text-white/40">Preview unavailable</div>
           )}
-        </Stack>
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <PlayCircle size={40} className="text-white" />
+          </div>
+        </a>
+      </div>
 
-        {tube.description && (
-          <Typography
-            color="text.secondary"
-            sx={{
-              mt: 1.1,
-              fontSize: '0.85rem',
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden'
-            }}
-          >
-            {tube.description}
-          </Typography>
+      <div className="mt-3 flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-[2px] border border-white/10 bg-black/60">
+            <Youtube size={16} className="text-coral" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white/90 line-clamp-1">{tube.title}</p>
+            <p className="text-[10px] text-white/40">{videoId ? `YouTube • ${videoId}` : 'YouTube'}</p>
+          </div>
+        </div>
+        {canEdit && (
+          <div className="flex items-center gap-2 text-white/50">
+            <button onClick={() => onEdit(tube)}>
+              <Edit3 size={14} />
+            </button>
+            <button className="text-coral" onClick={() => setConfirmOpen(true)}>
+              <Trash2 size={14} />
+            </button>
+          </div>
         )}
-        <Stack direction="row" spacing={1} sx={{ mt: 1.2, flexWrap: 'wrap' }}>
-          {tube.tags?.map((tag) => (
-            <Chip key={tag} label={tag} size="small" />
+      </div>
+
+      {tube.description && <p className="mt-2 text-xs text-white/50 line-clamp-2">{tube.description}</p>}
+      {tube.tags?.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2">
+          {tube.tags.map((tag) => (
+            <span key={tag} className="rounded-full border border-white/10 px-2 py-1 text-[10px] text-white/50">
+              {tag}
+            </span>
           ))}
-        </Stack>
-      </CardContent>
+        </div>
+      )}
+
       <ConfirmDialog
         open={confirmOpen}
         title="Delete tube?"

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Skeleton, Typography, Card, CardContent } from '@mui/material';
 import { useAuth } from '../../../lib/auth';
 import { createAlert, sendBroadcastSms, subscribeToAlerts, updateAlertStatus } from '../api';
 import AlertForm from '../components/AlertForm';
 import AlertsList from '../components/AlertsList';
 import SmsStatusBanner from '../components/SmsStatusBanner';
 import EmptyState from '../../../components/EmptyState';
+import Card from '../../../components/ui/Card';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const AlertsPage = () => {
   const { user } = useAuth();
@@ -54,27 +55,27 @@ const AlertsPage = () => {
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-        Alerts
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Broadcast an urgent message to every member.
-      </Typography>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-gradient">Alerts</h2>
+        <p className="text-sm text-white/50">Broadcast an urgent message to every member.</p>
+      </div>
       <SmsStatusBanner status={banner} />
-      <Card sx={{ mb: 3, borderRadius: 2, border: '1px solid rgba(255, 173, 153, 0.2)' }}>
-        <CardContent>
-          <AlertForm onSubmit={handleSend} sending={sending} />
-        </CardContent>
+      <Card className="rounded-[2px]">
+        <AlertForm onSubmit={handleSend} sending={sending} />
       </Card>
       {loading ? (
-        [0, 1, 2].map((item) => <Skeleton key={item} height={140} sx={{ mb: 2 }} />)
+        <div className="space-y-3">
+          {[0, 1, 2].map((item) => (
+            <Skeleton key={item} className="h-28 w-full" />
+          ))}
+        </div>
       ) : alerts.length === 0 ? (
         <EmptyState title="No alerts yet" subtitle="Broadcast your first alert when needed." />
       ) : (
         <AlertsList alerts={alerts} />
       )}
-    </Box>
+    </div>
   );
 };
 

@@ -1,12 +1,12 @@
 import React from 'react';
-import { Alert } from '@mui/material';
+import Alert from '../../../components/ui/Alert';
 
 const SmsStatusBanner = ({ status }) => {
   if (!status) return null;
 
   if (status.type === 'skipped') {
     return (
-      <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
+      <Alert variant="warning" className="mb-3">
         SMS not configured. Alert saved in Firestore only.
       </Alert>
     );
@@ -14,7 +14,7 @@ const SmsStatusBanner = ({ status }) => {
 
   if (status.type === 'failed') {
     return (
-      <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+      <Alert variant="error" className="mb-3">
         SMS failed to send. {status.message}
       </Alert>
     );
@@ -22,7 +22,7 @@ const SmsStatusBanner = ({ status }) => {
 
   if (status.type === 'sent') {
     return (
-      <Alert severity="success" sx={{ mb: 2, borderRadius: 2 }}>
+      <Alert variant="success" className="mb-3">
         SMS sent to all available phone numbers.
       </Alert>
     );

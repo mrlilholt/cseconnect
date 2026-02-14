@@ -1,19 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-  Typography,
-  IconButton,
-  Alert
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import ImageIcon from '@mui/icons-material/Image';
+import { Image, Camera } from 'lucide-react';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Textarea from '../../../components/ui/Textarea';
+import Alert from '../../../components/ui/Alert';
 
 const MAX_IMAGE_SIZE = 700 * 1024; // 700 KB
 
@@ -71,28 +61,32 @@ const NewPostDialog = ({ open, onClose, onSubmit, initialPost }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {initialPost ? 'Edit post' : 'New post'}
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField
-          label="Share something"
-          multiline
-          minRows={4}
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={initialPost ? 'Edit post' : 'New post'}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            {initialPost ? 'Save changes' : 'Post'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Textarea
+          rows={4}
+          placeholder="Share something"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          fullWidth
         />
 
-        <Box>
-          <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            Add an image
-          </Typography>
-          <Box
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-white/40">Add an image</p>
+          <div
             onDragOver={(event) => {
               event.preventDefault();
               setDragActive(true);
@@ -100,23 +94,14 @@ const NewPostDialog = ({ open, onClose, onSubmit, initialPost }) => {
             onDragLeave={() => setDragActive(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            sx={{
-              border: '1px dashed rgba(255, 173, 153, 0.6)',
-              borderRadius: 20,
-              p: 2,
-              textAlign: 'center',
-              backgroundColor: dragActive ? 'rgba(255, 173, 153, 0.15)' : '#FFFDFC',
-              cursor: 'pointer'
-            }}
+            className={`mt-2 flex cursor-pointer flex-col items-center gap-2 rounded-[2px] border border-dashed px-4 py-6 text-center text-xs text-white/50 ${
+              dragActive ? 'border-coral bg-white/5' : 'border-white/10 bg-black/40'
+            }`}
           >
-            <ImageIcon sx={{ color: 'primary.main', mb: 1 }} />
-            <Typography variant="body2" color="text.secondary">
-              Drag & drop an image here, or click to upload from camera roll.
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Max size 700 KB
-            </Typography>
-          </Box>
+            <Image size={18} className="text-coral" />
+            Drag & drop or tap to upload from camera roll.
+            <span className="text-[10px] text-white/30">Max size 700 KB</span>
+          </div>
           <input
             ref={fileInputRef}
             type="file"
@@ -125,45 +110,31 @@ const NewPostDialog = ({ open, onClose, onSubmit, initialPost }) => {
             style={{ display: 'none' }}
           />
           <Button
-            variant="outlined"
-            startIcon={<PhotoCameraIcon />}
-            sx={{ mt: 1 }}
+            variant="outline"
+            size="sm"
+            className="mt-2"
             onClick={() => fileInputRef.current?.click()}
           >
+            <Camera size={14} />
             Upload image
           </Button>
-        </Box>
+        </div>
 
-        {error && <Alert severity="warning">{error}</Alert>}
+        {error && <Alert variant="warning">{error}</Alert>}
 
         {imageData && (
-          <Box sx={{ mt: 1 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Image preview
-            </Typography>
-            <Box
-              component="img"
-              src={imageData}
-              alt="Preview"
-              sx={{
-                width: '100%',
-                borderRadius: 20,
-                border: '1px solid rgba(255, 173, 153, 0.4)'
-              }}
-            />
-            <Button onClick={() => setImageData('')} sx={{ mt: 1 }}>
+          <div>
+            <p className="text-xs text-white/40">Image preview</p>
+            <div className="mt-2 overflow-hidden rounded-[2px] border border-white/10">
+              <img src={imageData} alt="Preview" className="w-full object-contain" />
+            </div>
+            <Button variant="ghost" size="sm" className="mt-2" onClick={() => setImageData('')}>
               Remove image
             </Button>
-          </Box>
+          </div>
         )}
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {initialPost ? 'Save changes' : 'Post'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   );
 };
 

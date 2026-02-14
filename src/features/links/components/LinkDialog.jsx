@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  IconButton
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
 import TagInput from '../../../components/TagInput';
 
 const LinkDialog = ({ open, onClose, onSubmit, initialLink }) => {
@@ -42,32 +36,28 @@ const LinkDialog = ({ open, onClose, onSubmit, initialLink }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {initialLink ? 'Edit link' : 'Save link'}
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField label="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <TextField label="URL" value={url} onChange={(event) => setUrl(event.target.value)} />
-        <TextField
-          label="Description"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          multiline
-          minRows={3}
-        />
+    <Modal
+      open={open}
+      title={initialLink ? 'Edit link' : 'Save link'}
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            {initialLink ? 'Save changes' : 'Save link'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title" />
+        <Input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="URL" />
+        <Textarea rows={3} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Description" />
         <TagInput tags={tags} onChange={setTags} />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {initialLink ? 'Save changes' : 'Save link'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   );
 };
 

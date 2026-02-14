@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import { getMemberDisplayName, isAllowedLocal, normalizeEmail, sanitizeEmail } from './allowlist';
 
@@ -87,6 +87,36 @@ export const AuthProvider = ({ children }) => {
 
     return () => unsubscribe();
   }, [deniedEmail]);
+
+  useEffect(() => {
+    if (!user) return () => {};
+    const ref = doc(db, 'users', user.uid);
+    const updateLastSeen = async () => {
+      try {
+        await updateDoc(ref, { lastSeenAt: serverTimestamp() });
+      } catch (error) {
+        // Ignore non-blocking errors
+      }
+    };
+
+    updateLastSeen();
+    const interval = setInterval(updateLastSeen, 60 * 1000);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        updateLastSeen();
+      }
+    };
+
+    window.addEventListener('focus', updateLastSeen);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', updateLastSeen);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, [user]);
 
   const value = useMemo(
     () => ({

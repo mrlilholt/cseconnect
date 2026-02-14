@@ -1,20 +1,10 @@
 import React from 'react';
-import { Box, CircularProgress, Typography } from '@mui/material';
 
 const LoadingScreen = ({ label = 'Loading...' }) => (
-  <Box
-    sx={{
-      minHeight: '60vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 2
-    }}
-  >
-    <CircularProgress />
-    <Typography color="text.secondary">{label}</Typography>
-  </Box>
+  <div className="flex min-h-[300px] flex-col items-center justify-center gap-3">
+    <div className="h-10 w-10 animate-spin rounded-full border-2 border-coral border-t-transparent" />
+    <p className="text-xs text-white/50">{label}</p>
+  </div>
 );
 
 export default LoadingScreen;

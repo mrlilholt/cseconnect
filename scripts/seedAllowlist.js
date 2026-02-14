@@ -1,9 +1,31 @@
 import admin from 'firebase-admin';
+import fs from 'node:fs';
+import path from 'node:path';
 import { members } from '../src/config/members.js';
+
+const loadEnvFile = () => {
+  const envPath = path.resolve(process.cwd(), '.env');
+  if (!fs.existsSync(envPath)) return {};
+  const content = fs.readFileSync(envPath, 'utf8');
+  return content.split('\n').reduce((acc, line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return acc;
+    const [key, ...rest] = trimmed.split('=');
+    acc[key] = rest.join('=').trim();
+    return acc;
+  }, {});
+};
+
+const envFromFile = loadEnvFile();
+const projectId =
+  process.env.FIREBASE_PROJECT_ID ||
+  process.env.GOOGLE_CLOUD_PROJECT ||
+  envFromFile.VITE_FIREBASE_PROJECT_ID;
 
 if (admin.apps.length === 0) {
   admin.initializeApp({
-    credential: admin.credential.applicationDefault()
+    credential: admin.credential.applicationDefault(),
+    projectId
   });
 }
 

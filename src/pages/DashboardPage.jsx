@@ -1,111 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-  Stack,
-  Skeleton,
-  Button,
-  IconButton
-} from '@mui/material';
 import { collection, onSnapshot, orderBy, query, limit } from 'firebase/firestore';
-import { Link as RouterLink } from 'react-router-dom';
-import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import LinkIcon from '@mui/icons-material/Link';
-import YouTubeIcon from '@mui/icons-material/YouTube';
-import SpaIcon from '@mui/icons-material/Spa';
-import CampaignIcon from '@mui/icons-material/Campaign';
-import ChatIcon from '@mui/icons-material/Chat';
+import { Link } from 'react-router-dom';
+import {
+  Rss,
+  Layers,
+  HelpCircle,
+  Link2,
+  Youtube,
+  Sparkles,
+  Bell,
+  MessageSquare
+} from 'lucide-react';
 import { db } from '../lib/firebase';
 import { formatDateTime } from '../lib/time';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Skeleton from '../components/ui/Skeleton';
+import OnlineUsersPanel from '../components/OnlineUsersPanel';
 
 const RecentCard = ({ title, items, loading, emptyLabel }) => (
-  <Card sx={{ height: '100%', borderRadius: 2 }}>
-    <CardContent>
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        {title}
-      </Typography>
+  <Card className="rounded-[2px]">
+    <div className="flex items-center justify-between">
+      <h3 className="text-sm font-semibold text-gradient">{title}</h3>
+      <span className="text-[10px] uppercase tracking-[0.2em] text-white/40">Latest</span>
+    </div>
+    <div className="mt-3 space-y-2">
       {loading ? (
-        <Stack spacing={1}>
+        <div className="space-y-2">
           {[0, 1, 2].map((item) => (
-            <Skeleton key={item} height={28} />
+            <Skeleton key={item} className="h-6 w-full" />
           ))}
-        </Stack>
+        </div>
       ) : items.length === 0 ? (
-        <Typography color="text.secondary">{emptyLabel}</Typography>
+        <p className="text-xs text-white/50">{emptyLabel}</p>
       ) : (
-        <Stack spacing={1.5}>
-          {items.map((item) => (
-            <Box
-              key={item.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 2,
-                p: 1.5,
-                borderRadius: 2,
-                backgroundColor: 'rgba(255, 173, 153, 0.12)'
-              }}
-            >
-              <Typography sx={{ fontWeight: 500 }}>{item.title}</Typography>
-              <Typography color="text.secondary" variant="body2">
-                {formatDateTime(item.createdAt)}
-              </Typography>
-            </Box>
-          ))}
-        </Stack>
+        items.map((item) => (
+          <div
+            key={item.id}
+            className="flex items-center justify-between gap-2 rounded-[2px] border border-white/5 bg-white/5 px-3 py-2 text-xs"
+          >
+            <span className="text-white/80">{item.title}</span>
+            <span className="text-white/40">{formatDateTime(item.createdAt)}</span>
+          </div>
+        ))
       )}
-    </CardContent>
+    </div>
   </Card>
 );
 
-const NavCard = ({ title, subtitle, icon, to }) => (
-  <Card
-    component={RouterLink}
-    to={to}
-    sx={{
-      textDecoration: 'none',
-      height: '100%',
-      p: 2,
-      borderRadius: 24,
-      border: '1px solid rgba(255, 173, 153, 0.25)',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 2,
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-      '&:hover': {
-        transform: 'translateY(-2px)',
-        boxShadow: '0 18px 40px rgba(255, 125, 110, 0.18)'
-      }
-    }}
-  >
-    <Box
-      sx={{
-        width: 52,
-        height: 52,
-        borderRadius: 20,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'rgba(255, 125, 110, 0.18)',
-        color: 'primary.main'
-      }}
-    >
-      {icon}
-    </Box>
-    <Box>
-      <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-        {title}
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {subtitle}
-      </Typography>
-    </Box>
+const QuickDock = ({ items, loading }) => (
+  <Card className="rounded-[2px]">
+    <div className="flex items-center justify-between">
+      <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Quick Dock</h3>
+      {loading ? <Skeleton className="h-3 w-12" /> : <span className="text-[10px] text-white/40">Instant access</span>}
+    </div>
+    <div className="mt-4 grid grid-cols-4 gap-2">
+      {items.map((item) => (
+        <Link
+          key={item.label}
+          to={item.to}
+          title={item.label}
+          aria-label={item.label}
+          className="flex flex-col items-center gap-2 rounded-[2px] border border-white/10 bg-black/40 px-2 py-3 transition hover:border-coral/40 hover:bg-white/5"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-[2px] border border-white/10 bg-black/60">
+            <item.icon size={18} className="text-coral" />
+          </div>
+        </Link>
+      ))}
+    </div>
   </Card>
+);
+
+const NavCard = ({ title, subtitle, icon: Icon, to }) => (
+  <Link to={to} className="block">
+    <Card className="rounded-[2px] transition hover:shadow-glow">
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-[2px] border border-white/10 bg-black/50">
+          <Icon size={18} className="text-coral" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white/90">{title}</p>
+          <p className="text-xs text-white/50">{subtitle}</p>
+        </div>
+      </div>
+    </Card>
+  </Link>
 );
 
 const DashboardPage = () => {
@@ -125,6 +105,7 @@ const DashboardPage = () => {
   const [recentLoading, setRecentLoading] = useState(true);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [isIosInstallHint, setIsIosInstallHint] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     const syncInstallPrompt = () => {
@@ -134,13 +115,20 @@ const DashboardPage = () => {
     syncInstallPrompt();
     window.addEventListener('pwa-install-available', syncInstallPrompt);
 
-    const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    setIsIosInstallHint(isIos && !isStandalone);
+    const detectInstallState = () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+      setIsInstalled(Boolean(isStandalone));
+      const isIos = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+      setIsIosInstallHint(isIos && !isStandalone);
+    };
+
+    detectInstallState();
+    window.addEventListener('appinstalled', detectInstallState);
 
     return () => {
       window.removeEventListener('pwa-install-available', syncInstallPrompt);
+      window.removeEventListener('appinstalled', detectInstallState);
     };
   }, []);
 
@@ -154,58 +142,38 @@ const DashboardPage = () => {
     const unsubscribers = [];
 
     unsubscribers.push(
-      onSnapshot(
-        feedCountRef,
-        (snap) => {
-          setCounts((prev) => ({ ...prev, feed: snap.size }));
-          setCountLoading(false);
-        },
-        () => setCountLoading(false)
-      )
+      onSnapshot(feedCountRef, (snap) => {
+        setCounts((prev) => ({ ...prev, feed: snap.size }));
+        setCountLoading(false);
+      })
     );
 
     unsubscribers.push(
-      onSnapshot(
-        projectCountRef,
-        (snap) => {
-          setCounts((prev) => ({ ...prev, projects: snap.size }));
-          setCountLoading(false);
-        },
-        () => setCountLoading(false)
-      )
+      onSnapshot(projectCountRef, (snap) => {
+        setCounts((prev) => ({ ...prev, projects: snap.size }));
+        setCountLoading(false);
+      })
     );
 
     unsubscribers.push(
-      onSnapshot(
-        questionCountRef,
-        (snap) => {
-          setCounts((prev) => ({ ...prev, questions: snap.size }));
-          setCountLoading(false);
-        },
-        () => setCountLoading(false)
-      )
+      onSnapshot(questionCountRef, (snap) => {
+        setCounts((prev) => ({ ...prev, questions: snap.size }));
+        setCountLoading(false);
+      })
     );
 
     unsubscribers.push(
-      onSnapshot(
-        linkCountRef,
-        (snap) => {
-          setCounts((prev) => ({ ...prev, links: snap.size }));
-          setCountLoading(false);
-        },
-        () => setCountLoading(false)
-      )
+      onSnapshot(linkCountRef, (snap) => {
+        setCounts((prev) => ({ ...prev, links: snap.size }));
+        setCountLoading(false);
+      })
     );
 
     unsubscribers.push(
-      onSnapshot(
-        alertCountRef,
-        (snap) => {
-          setCounts((prev) => ({ ...prev, alerts: snap.size }));
-          setCountLoading(false);
-        },
-        () => setCountLoading(false)
-      )
+      onSnapshot(alertCountRef, (snap) => {
+        setCounts((prev) => ({ ...prev, alerts: snap.size }));
+        setCountLoading(false);
+      })
     );
 
     return () => {
@@ -290,227 +258,123 @@ const DashboardPage = () => {
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1.5, flexDirection: 'column', alignItems: 'flex-end' }}>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={handleInstallClick}
-          disabled={!installPrompt && !isIosInstallHint}
-          sx={{ borderRadius: 2 }}
-        >
-          Install app
-        </Button>
-        {isIosInstallHint && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-            iOS: Share → Add to Home Screen
-          </Typography>
-        )}
-      </Box>
-      <Card
-        sx={{
-          mb: 3,
-          overflow: 'hidden',
-          borderRadius: 2,
-          background: 'linear-gradient(135deg, rgba(255,173,153,0.9) 0%, rgba(255,125,110,0.95) 100%)',
-          color: '#fff'
-        }}
-      >
-        <CardContent sx={{ p: { xs: 3, md: 4 } }}>
-          <Box sx={{ maxWidth: 720 }}>
-            <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-              Welcome back
-            </Typography>
-            <Typography sx={{ opacity: 0.9, mb: 2 }}>
-              A quick pulse on the CS&E department. Jump into the latest updates or start a new thread.
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-              <Button component={RouterLink} to="/feed" variant="contained" sx={{ backgroundColor: '#fff', color: '#F26459' }}>
+    <div className="space-y-6">
+      {!isInstalled && (
+        <div className="flex flex-col items-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleInstallClick}
+            disabled={!installPrompt && !isIosInstallHint}
+            className="rounded-[2px] px-4"
+          >
+            Install app
+          </Button>
+          {isIosInstallHint && (
+            <span className="mt-1 text-[10px] text-white/40">iOS: Share → Add to Home Screen</span>
+          )}
+        </div>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-[2fr,1fr]">
+        <Card className="relative overflow-hidden rounded-[2px] px-6 py-8">
+          <div className="pointer-events-none absolute right-6 top-1/2 h-48 w-48 -translate-y-1/2">
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-coral/40 to-neonpink/40 blur-2xl" />
+            <div className="absolute inset-4 animate-[spin_18s_linear_infinite] rounded-full border border-white/20" />
+            <div className="absolute inset-10 animate-[spin_28s_linear_infinite] rounded-full border border-white/10" />
+            <div className="absolute inset-16 rounded-full bg-white/10 blur-sm" />
+          </div>
+          <div className="relative max-w-xl">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">Department pulse</span>
+            <h2 className="mt-3 text-3xl font-semibold text-gradient">Welcome back</h2>
+            <p className="mt-2 text-sm text-white/60">
+              A quick pulse on the CS&E department. Jump into the latest updates or start a new
+              thread.
+            </p>
+            <div className="mt-5 flex flex-wrap gap-3">
+              <Button as="a" href="/feed">
                 View feed
               </Button>
-              <Button component={RouterLink} to="/messages" variant="outlined" sx={{ borderColor: 'rgba(255,255,255,0.7)', color: '#fff' }}>
+              <Button as="a" href="/messages" variant="outline">
                 Open chat
               </Button>
-            </Stack>
-          </Box>
-        </CardContent>
-      </Card>
+            </div>
+            <div className="mt-6 flex items-center gap-4 text-xs text-white/50">
+              <span className="flex items-center gap-1">
+                <Rss size={14} className="text-coral" />
+                {countLoading ? '—' : `${counts.feed} posts`}
+              </span>
+              <span className="flex items-center gap-1">
+                <Layers size={14} className="text-coral" />
+                {countLoading ? '—' : `${counts.projects} projects`}
+              </span>
+              <span className="flex items-center gap-1">
+                <HelpCircle size={14} className="text-coral" />
+                {countLoading ? '—' : `${counts.questions} questions`}
+              </span>
+              <span className="flex items-center gap-1">
+                <Link2 size={14} className="text-coral" />
+                {countLoading ? '—' : `${counts.links} links`}
+              </span>
+            </div>
+          </div>
+        </Card>
 
-      <Card sx={{ mb: 3, borderRadius: 2, border: '1px solid rgba(255, 173, 153, 0.25)' }}>
-        <CardContent sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="center" sx={{ flexWrap: 'wrap' }}>
-            <Stack alignItems="center" spacing={0.5}>
-              <IconButton
-                size="large"
-                sx={{ backgroundColor: 'rgba(255, 173, 153, 0.2)', color: 'primary.main', borderRadius: 2 }}
-              >
-                <DynamicFeedIcon />
-              </IconButton>
-              {countLoading ? (
-                <Skeleton variant="text" width={24} />
-              ) : (
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  {counts.feed}
-                </Typography>
-              )}
-            </Stack>
-            <Stack alignItems="center" spacing={0.5}>
-              <IconButton
-                size="large"
-                sx={{ backgroundColor: 'rgba(255, 173, 153, 0.2)', color: 'primary.main', borderRadius: 2 }}
-              >
-                <WorkspacesIcon />
-              </IconButton>
-              {countLoading ? (
-                <Skeleton variant="text" width={24} />
-              ) : (
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  {counts.projects}
-                </Typography>
-              )}
-            </Stack>
-            <Stack alignItems="center" spacing={0.5}>
-              <IconButton
-                size="large"
-                sx={{ backgroundColor: 'rgba(255, 173, 153, 0.2)', color: 'primary.main', borderRadius: 2 }}
-              >
-                <QuestionAnswerIcon />
-              </IconButton>
-              {countLoading ? (
-                <Skeleton variant="text" width={24} />
-              ) : (
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  {counts.questions}
-                </Typography>
-              )}
-            </Stack>
-            <Stack alignItems="center" spacing={0.5}>
-              <IconButton
-                size="large"
-                sx={{ backgroundColor: 'rgba(255, 173, 153, 0.2)', color: 'primary.main', borderRadius: 2 }}
-              >
-                <LinkIcon />
-              </IconButton>
-              {countLoading ? (
-                <Skeleton variant="text" width={24} />
-              ) : (
-                <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                  {counts.links}
-                </Typography>
-              )}
-            </Stack>
-          </Stack>
-          <Typography variant="subtitle2" color="text.secondary">
-            Department totals
-          </Typography>
-        </CardContent>
-      </Card>
+        <div className="flex flex-col gap-4">
+          <QuickDock
+            loading={countLoading}
+            items={[
+              { label: 'Feed', icon: Rss, to: '/feed' },
+              { label: 'Projects', icon: Layers, to: '/projects' },
+              { label: 'Questions', icon: HelpCircle, to: '/qa' },
+              { label: 'Links', icon: Link2, to: '/links' }
+            ]}
+          />
+          <OnlineUsersPanel />
+        </div>
+      </div>
 
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} md={6}>
-          <RecentCard
-            title="Recent feed activity"
-            items={recentFeed}
-            loading={recentLoading}
-            emptyLabel="No posts yet."
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <RecentCard
-            title="Recent projects"
-            items={recentProjects}
-            loading={recentLoading}
-            emptyLabel="No projects yet."
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <RecentCard
-            title="Recent questions"
-            items={recentQuestions}
-            loading={recentLoading}
-            emptyLabel="No questions yet."
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <RecentCard
-            title="Recent alerts"
-            items={recentAlerts}
-            loading={recentLoading}
-            emptyLabel="No alerts yet."
-          />
-        </Grid>
-      </Grid>
+      <div className="grid gap-4 md:grid-cols-2">
+        <RecentCard
+          title="Recent feed activity"
+          items={recentFeed}
+          loading={recentLoading}
+          emptyLabel="No posts yet."
+        />
+        <RecentCard
+          title="Recent projects"
+          items={recentProjects}
+          loading={recentLoading}
+          emptyLabel="No projects yet."
+        />
+        <RecentCard
+          title="Recent questions"
+          items={recentQuestions}
+          loading={recentLoading}
+          emptyLabel="No questions yet."
+        />
+        <RecentCard
+          title="Recent alerts"
+          items={recentAlerts}
+          loading={recentLoading}
+          emptyLabel="No alerts yet."
+        />
+      </div>
 
-      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-        Quick navigation
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/feed"
-            title="Department feed"
-            subtitle="Share the latest updates"
-            icon={<DynamicFeedIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/projects"
-            title="Projects board"
-            subtitle="Track side work and demos"
-            icon={<WorkspacesIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/messages"
-            title="Group chat"
-            subtitle="Jump into live channels"
-            icon={<ChatIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/qa"
-            title="Q&A"
-            subtitle="Get answers fast"
-            icon={<QuestionAnswerIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/links"
-            title="Saved links"
-            subtitle="Curate articles and videos"
-            icon={<LinkIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/tubes"
-            title="Tubes"
-            subtitle="Share YouTube videos"
-            icon={<YouTubeIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/zen"
-            title="Moments of ZEN"
-            subtitle="Share calm and gratitude"
-            icon={<SpaIcon />}
-          />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <NavCard
-            to="/alerts"
-            title="Broadcast alert"
-            subtitle="Send an all-hands ping"
-            icon={<CampaignIcon />}
-          />
-        </Grid>
-      </Grid>
-    </Box>
+      <div>
+        <h3 className="text-sm font-semibold text-gradient">Quick navigation</h3>
+        <div className="mt-3 grid gap-3 md:grid-cols-3">
+          <NavCard title="Department feed" subtitle="Share the latest updates" icon={Rss} to="/feed" />
+          <NavCard title="Projects board" subtitle="Track side work and demos" icon={Layers} to="/projects" />
+          <NavCard title="Group chat" subtitle="Jump into live channels" icon={MessageSquare} to="/messages" />
+          <NavCard title="Q&A" subtitle="Get answers fast" icon={HelpCircle} to="/qa" />
+          <NavCard title="Saved links" subtitle="Curate articles and videos" icon={Link2} to="/links" />
+          <NavCard title="Tubes" subtitle="Share YouTube videos" icon={Youtube} to="/tubes" />
+          <NavCard title="Moments of ZEN" subtitle="Share calm and gratitude" icon={Sparkles} to="/zen" />
+          <NavCard title="Broadcast alert" subtitle="Send an all-hands ping" icon={Bell} to="/alerts" />
+        </div>
+      </div>
+    </div>
   );
 };
 

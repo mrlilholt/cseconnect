@@ -1,18 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  IconButton,
-  Box,
-  Typography,
-  Alert
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
 import TagInput from '../../../components/TagInput';
+import Alert from '../../../components/ui/Alert';
 import { extractYouTubeId, getYouTubeThumbnail } from '../utils';
 
 const TubeDialog = ({ open, onClose, onSubmit, initialTube }) => {
@@ -56,48 +48,37 @@ const TubeDialog = ({ open, onClose, onSubmit, initialTube }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {initialTube ? 'Edit tube' : 'Share a tube'}
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-        <TextField label="Title" value={title} onChange={(event) => setTitle(event.target.value)} />
-        <TextField
-          label="YouTube URL"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-          placeholder="https://www.youtube.com/watch?v=..."
-        />
+    <Modal
+      open={open}
+      title={initialTube ? 'Edit tube' : 'Share a tube'}
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            {initialTube ? 'Save changes' : 'Share tube'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Title" />
+        <Input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="YouTube URL" />
         {thumbnail && (
-          <Box sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid rgba(255, 173, 153, 0.3)' }}>
-            <Box component="img" src={thumbnail} alt="Video preview" sx={{ width: '100%', display: 'block' }} />
-          </Box>
+          <div className="overflow-hidden rounded-[2px] border border-white/10">
+            <img src={thumbnail} alt="Video preview" className="w-full object-cover" />
+          </div>
         )}
-        <TextField
-          label="Description"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          multiline
-          minRows={3}
-        />
+        <Textarea rows={3} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Description" />
         <TagInput tags={tags} onChange={setTags} label="Tags" />
-        {error && <Alert severity="warning">{error}</Alert>}
+        {error && <Alert variant="warning">{error}</Alert>}
         {!videoId && url.trim().length > 0 && (
-          <Typography variant="caption" color="text.secondary">
-            Supported formats: youtube.com/watch?v=, youtu.be/, youtube.com/shorts/
-          </Typography>
+          <p className="text-[10px] text-white/40">Supported: youtube.com/watch?v=, youtu.be/, youtube.com/shorts/</p>
         )}
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          {initialTube ? 'Save changes' : 'Share tube'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </Modal>
   );
 };
 

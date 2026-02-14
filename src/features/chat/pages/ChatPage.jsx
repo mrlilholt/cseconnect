@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Grid, Snackbar, Alert, Skeleton, Typography } from '@mui/material';
 import { useAuth } from '../../../lib/auth';
 import { createChannel, sendMessage, subscribeToChannels, subscribeToMessages } from '../api';
 import ChannelList from '../components/ChannelList';
 import ChatWindow from '../components/ChatWindow';
 import NewChannelDialog from '../components/NewChannelDialog';
+import OnlineUsersPanel from '../../../components/OnlineUsersPanel';
+import Alert from '../../../components/ui/Alert';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const ChatPage = () => {
   const { user } = useAuth();
@@ -14,7 +16,7 @@ const ChatPage = () => {
   const [messageText, setMessageText] = useState('');
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
   const lastSeenMessageRef = useRef({});
 
   useEffect(() => {
@@ -37,10 +39,6 @@ const ChatPage = () => {
     return () => unsub();
   }, [selectedChannel]);
 
-  const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
-  };
-
   useEffect(() => {
     if (!selectedChannel || messages.length === 0) return;
     const lastMessage = messages[messages.length - 1];
@@ -55,7 +53,8 @@ const ChatPage = () => {
     if (lastSeenId !== lastMessage.id) {
       if (lastMessage.authorUid !== user?.uid) {
         const snippet = lastMessage.text?.slice(0, 60) || 'New message';
-        showMessage(`New in #${selectedChannel.name}: ${snippet}`, 'info');
+        setSnackbar({ message: `New in #${selectedChannel.name}: ${snippet}` });
+        setTimeout(() => setSnackbar(null), 3000);
       }
       lastSeenMessageRef.current[channelId] = lastMessage.id;
     }
@@ -65,9 +64,8 @@ const ChatPage = () => {
     try {
       await createChannel(name);
       setDialogOpen(false);
-      showMessage('Channel created.');
     } catch (error) {
-      showMessage(error.message || 'Unable to create channel.', 'error');
+      setSnackbar({ message: error.message || 'Unable to create channel.' });
     }
   };
 
@@ -81,66 +79,51 @@ const ChatPage = () => {
       });
       setMessageText('');
     } catch (error) {
-      showMessage(error.message || 'Unable to send message.', 'error');
+      setSnackbar({ message: error.message || 'Unable to send message.' });
     }
   };
 
   return (
-    <Box>
-      <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-        Group Chat
-      </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
-        Jump into a channel and keep the conversation moving.
-      </Typography>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-semibold text-gradient">Group Chat</h2>
+        <p className="text-sm text-white/50">Jump into a channel and keep the conversation moving.</p>
+      </div>
 
       {loading ? (
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
-            <Skeleton height={360} />
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <Skeleton height={360} />
-          </Grid>
-        </Grid>
+        <div className="grid gap-4 md:grid-cols-[1fr_2fr]">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       ) : (
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={4}>
+        <div className="grid gap-4 md:grid-cols-[1fr_2fr]">
+          <div className="flex flex-col gap-4">
+            <OnlineUsersPanel title="Online now" max={6} />
             <ChannelList
               channels={channels}
               selectedId={selectedChannel?.id}
               onSelect={setSelectedChannel}
               onCreate={() => setDialogOpen(true)}
             />
-          </Grid>
-          <Grid item xs={12} md={8}>
-            <ChatWindow
-              channel={selectedChannel}
-              messages={messages}
-              messageText={messageText}
-              onChange={setMessageText}
-              onSend={handleSend}
-            />
-          </Grid>
-        </Grid>
+          </div>
+          <ChatWindow
+            channel={selectedChannel}
+            messages={messages}
+            messageText={messageText}
+            onChange={setMessageText}
+            onSend={handleSend}
+          />
+        </div>
       )}
 
-      <NewChannelDialog
-        open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
-        onSubmit={handleCreateChannel}
-      />
+      <NewChannelDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSubmit={handleCreateChannel} />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6">
+          <Alert variant="info">{snackbar.message}</Alert>
+        </div>
+      )}
+    </div>
   );
 };
 

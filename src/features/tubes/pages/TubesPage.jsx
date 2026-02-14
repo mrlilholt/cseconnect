@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Grid, Snackbar, Alert, Skeleton, Typography } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { Plus } from 'lucide-react';
 import { useAuth } from '../../../lib/auth';
 import { createTube, deleteTube, subscribeToTubes, updateTube } from '../api';
 import TubeDialog from '../components/TubeDialog';
 import TubeCard from '../components/TubeCard';
 import EmptyState from '../../../components/EmptyState';
+import Button from '../../../components/ui/Button';
+import Skeleton from '../../../components/ui/Skeleton';
 
 const TubesPage = () => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const TubesPage = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTube, setEditingTube] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [snackbar, setSnackbar] = useState(null);
 
   useEffect(() => {
     const unsub = subscribeToTubes((items) => {
@@ -23,8 +24,9 @@ const TubesPage = () => {
     return () => unsub();
   }, []);
 
-  const showMessage = (message, severity = 'success') => {
-    setSnackbar({ open: true, message, severity });
+  const showMessage = (message) => {
+    setSnackbar({ message });
+    setTimeout(() => setSnackbar(null), 3000);
   };
 
   const handleCreate = async (payload) => {
@@ -33,7 +35,7 @@ const TubesPage = () => {
       setDialogOpen(false);
       showMessage('Tube shared.');
     } catch (error) {
-      showMessage(error.message || 'Unable to share tube.', 'error');
+      showMessage(error.message || 'Unable to share tube.');
     }
   };
 
@@ -44,7 +46,7 @@ const TubesPage = () => {
       setDialogOpen(false);
       showMessage('Tube updated.');
     } catch (error) {
-      showMessage(error.message || 'Unable to update tube.', 'error');
+      showMessage(error.message || 'Unable to update tube.');
     }
   };
 
@@ -53,50 +55,46 @@ const TubesPage = () => {
       await deleteTube(tubeId);
       showMessage('Tube deleted.');
     } catch (error) {
-      showMessage(error.message || 'Unable to delete tube.', 'error');
+      showMessage(error.message || 'Unable to delete tube.');
     }
   };
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Tubes
-          </Typography>
-          <Typography color="text.secondary">Share YouTube videos and demos with the team.</Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setDialogOpen(true)}>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-gradient">Tubes</h2>
+          <p className="text-sm text-white/50">Share YouTube videos and demos with the team.</p>
+        </div>
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus size={14} />
           Share tube
         </Button>
-      </Box>
+      </div>
 
       {loading ? (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[0, 1, 2, 3].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={item}>
-              <Skeleton height={160} />
-            </Grid>
+            <Skeleton key={item} className="h-40 w-full" />
           ))}
-        </Grid>
+        </div>
       ) : tubes.length === 0 ? (
         <EmptyState title="No tubes yet" subtitle="Share the first YouTube link with the team." />
       ) : (
-        <Grid container spacing={2}>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {tubes.map((tube) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={tube.id}>
-              <TubeCard
-                tube={tube}
-                canEdit={tube.authorUid === user.uid}
-                onEdit={(item) => {
-                  setEditingTube(item);
-                  setDialogOpen(true);
-                }}
-                onDelete={handleDelete}
-              />
-            </Grid>
+            <TubeCard
+              key={tube.id}
+              tube={tube}
+              canEdit={tube.authorUid === user.uid}
+              onEdit={(item) => {
+                setEditingTube(item);
+                setDialogOpen(true);
+              }}
+              onDelete={handleDelete}
+            />
           ))}
-        </Grid>
+        </div>
       )}
 
       <TubeDialog
@@ -109,16 +107,12 @@ const TubesPage = () => {
         initialTube={editingTube}
       />
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
+      {snackbar && (
+        <div className="fixed bottom-24 right-6 rounded-[2px] border border-white/10 bg-black/70 px-4 py-2 text-xs text-white/80">
           {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Box>
+        </div>
+      )}
+    </div>
   );
 };
 

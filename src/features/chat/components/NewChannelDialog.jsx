@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  IconButton
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
 
 const NewChannelDialog = ({ open, onClose, onSubmit }) => {
   const [name, setName] = useState('');
@@ -20,28 +13,23 @@ const NewChannelDialog = ({ open, onClose, onSubmit }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" PaperProps={{ sx: { borderRadius: 2 } }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        New channel
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent sx={{ mt: 1 }}>
-        <TextField
-          label="Channel name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          fullWidth
-        />
-      </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
-          Create
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <Modal
+      open={open}
+      title="New channel"
+      onClose={onClose}
+      actions={
+        <>
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button size="sm" onClick={handleSubmit}>
+            Create
+          </Button>
+        </>
+      }
+    >
+      <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Channel name" />
+    </Modal>
   );
 };
 

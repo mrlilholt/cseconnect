@@ -1,38 +1,30 @@
 import React from 'react';
-import { Box, Button, Card, CardContent, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import Card from '../components/ui/Card';
+import Button from '../components/ui/Button';
 
 const AccessDeniedPage = () => {
   const navigate = useNavigate();
   const { deniedEmail } = useAuth();
 
   return (
-    <Box
-      sx={{
-        minHeight: '70vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: 2
-      }}
-    >
-      <Card sx={{ maxWidth: 520, width: '100%' }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h5" sx={{ fontWeight: 700 }} gutterBottom>
-            Access not granted
-          </Typography>
-          <Typography color="text.secondary" sx={{ mb: 3 }}>
-            {deniedEmail
-              ? `The account ${deniedEmail} is not on the department allowlist.`
-              : 'Your account is not on the department allowlist.'}
-          </Typography>
-          <Button variant="contained" onClick={() => navigate('/signin')}>
-            Back to sign in
-          </Button>
-        </CardContent>
+    <div className="flex min-h-[70vh] items-center justify-center px-4">
+      <Card className="w-full max-w-lg rounded-[2px]">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="CS&E Connect logo" className="h-10 w-10 rounded-[2px]" />
+          <h2 className="text-xl font-semibold text-gradient font-display">Access not granted</h2>
+        </div>
+        <p className="mt-3 text-sm text-white/50">
+          {deniedEmail
+            ? `The account ${deniedEmail} is not on the department allowlist.`
+            : 'Your account is not on the department allowlist.'}
+        </p>
+        <Button className="mt-6" onClick={() => navigate('/signin')}>
+          Back to sign in
+        </Button>
       </Card>
-    </Box>
+    </div>
   );
 };
 

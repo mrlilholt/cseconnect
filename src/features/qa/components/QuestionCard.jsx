@@ -1,18 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Stack,
-  Chip,
-  IconButton,
-  Box,
-  Button,
-  Divider
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
+import { Edit3, Trash2, Plus } from 'lucide-react';
+import Card from '../../../components/ui/Card';
+import Chip from '../../../components/ui/Chip';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import AnswerDialog from './AnswerDialog';
 import { addAnswer, deleteAnswer, subscribeToAnswers, updateAnswer } from '../api';
@@ -50,85 +39,67 @@ const QuestionCard = ({ question, onEdit, onDelete }) => {
   };
 
   return (
-    <Card sx={{ mb: 2, borderRadius: 2, border: '1px solid rgba(255, 173, 153, 0.2)' }}>
-      <CardContent>
-        <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={2}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {question.title}
-            </Typography>
-            <Typography color="text.secondary" sx={{ mt: 1 }}>
-              {question.body}
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }}>
-              {question.tags?.map((tag) => (
-                <Chip key={tag} label={tag} size="small" />
-              ))}
-            </Stack>
-          </Box>
-          {question.authorUid === user.uid && (
-            <Stack direction="row" spacing={1}>
-              <IconButton onClick={() => onEdit(question)} size="small">
-                <EditIcon fontSize="small" />
-              </IconButton>
-              <IconButton onClick={() => setConfirmOpen(true)} size="small" color="error">
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          )}
-        </Stack>
-        <Divider sx={{ my: 2 }} />
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-            Answers ({answers.length})
-          </Typography>
-          <Button size="small" startIcon={<AddIcon />} onClick={() => setAnswerDialogOpen(true)}>
-            Add answer
-          </Button>
-        </Stack>
-        <Stack spacing={1} sx={{ mt: 2 }}>
-          {answers.length === 0 && (
-            <Typography color="text.secondary">No answers yet. Be the first to respond.</Typography>
-          )}
-          {answers.map((answer) => (
-            <Box
-              key={answer.id}
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 2,
-                p: 1.5,
-                borderRadius: 20,
-                backgroundColor: 'rgba(255, 173, 153, 0.12)'
-              }}
-            >
-              <Box>
-                <Typography sx={{ fontWeight: 600 }}>{answer.authorName || 'Member'}</Typography>
-                <Typography>{answer.body}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {formatDateTime(answer.createdAt)}
-                </Typography>
-              </Box>
+    <Card className="rounded-[2px]">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-sm font-semibold text-white">{question.title}</p>
+          <p className="mt-2 text-xs text-white/60">{question.body}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {question.tags?.map((tag) => (
+              <Chip key={tag} label={tag} />
+            ))}
+          </div>
+        </div>
+        {question.authorUid === user.uid && (
+          <div className="flex items-center gap-2 text-white/50">
+            <button onClick={() => onEdit(question)}>
+              <Edit3 size={16} />
+            </button>
+            <button onClick={() => setConfirmOpen(true)} className="text-coral">
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="my-4 h-px bg-white/10" />
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-white/70">Answers ({answers.length})</p>
+        <button
+          className="flex items-center gap-1 text-xs text-coral"
+          onClick={() => setAnswerDialogOpen(true)}
+        >
+          <Plus size={14} /> Add answer
+        </button>
+      </div>
+      <div className="mt-3 space-y-3">
+        {answers.length === 0 && <p className="text-xs text-white/40">No answers yet.</p>}
+        {answers.map((answer) => (
+          <div key={answer.id} className="rounded-[2px] bg-white/5 px-3 py-2">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-semibold text-white/80">{answer.authorName || 'Member'}</p>
+                <p className="text-xs text-white/60">{answer.body}</p>
+                <p className="text-[10px] text-white/40">{formatDateTime(answer.createdAt)}</p>
+              </div>
               {answer.authorUid === user.uid && (
-                <Stack direction="row" spacing={1}>
-                  <IconButton
-                    size="small"
+                <div className="flex items-center gap-2 text-white/50">
+                  <button
                     onClick={() => {
                       setEditingAnswer(answer);
                       setAnswerDialogOpen(true);
                     }}
                   >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton size="small" color="error" onClick={() => handleDeleteAnswer(answer.id)}>
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Stack>
+                    <Edit3 size={14} />
+                  </button>
+                  <button className="text-coral" onClick={() => handleDeleteAnswer(answer.id)}>
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               )}
-            </Box>
-          ))}
-        </Stack>
-      </CardContent>
+            </div>
+          </div>
+        ))}
+      </div>
       <ConfirmDialog
         open={confirmOpen}
         title="Delete question?"
