@@ -21,8 +21,8 @@ export default defineConfig({
         name: 'CS&E Connect',
         short_name: 'CS&E',
         description: 'Internal collaboration hub for the CS&E department.',
-        theme_color: '#FF7D6E',
-        background_color: '#FFF7F4',
+        theme_color: '#CC00FF',
+        background_color: '#000000',
         display: 'standalone',
         start_url: '/',
         icons: [
